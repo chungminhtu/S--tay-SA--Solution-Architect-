@@ -194,7 +194,7 @@ Tech Lead phải gánh thêm:
 
 **Kỹ năng cần phát triển:**
 
-| Skill | Tech Lead có | SA cần thêm |
+| Kỹ năng | Tech Lead có | SA cần thêm |
 |-------|-------------|-------------|
 | Code review | ✅ | System design review |
 | Team management | ✅ | Cross-team coordination |
@@ -206,7 +206,7 @@ Tech Lead phải gánh thêm:
 
 **Cụ thể phải học:**
 
-| Week | Focus | Deliverable |
+| Tuần | Trọng tâm | Sản phẩm |
 |------|-------|-------------|
 | 1-2 | NFRs | Viết NFR spec cho project hiện tại |
 | 3-4 | Diagrams | Vẽ Context + Component diagram |
@@ -425,22 +425,22 @@ resource "aws_budgets_budget" "monthly" {
 
 **Tài liệu Scope:**
 
-| Section | Content |
+| Mục | Nội dung |
 |---------|---------|
 | **Project** | E-Commerce Platform |
-| **Objective** | Users mua hàng online, thanh toán, track đơn hàng |
-| **Success Metrics** | 10,000 orders/day, Conversion > 2%, Cart abandonment < 70% |
+| **Mục tiêu** | Users mua hàng online, thanh toán, track đơn hàng |
+| **Chỉ số thành công** | 10,000 orders/ngày, Conversion > 2%, Cart abandonment < 70% |
 
 **Constraints:**
 
-| Type | Constraint | Reason |
+| Loại | Ràng buộc | Lý do |
 |------|------------|--------|
 | Timeline | MVP trong 3 tháng | Contract với investor |
 | Budget | $50k/tháng infra | Runway 18 tháng |
-| Tech | Phải dùng AWS | Existing contract |
-| Tech | Phải dùng Go | Team expertise |
+| Tech | Phải dùng AWS | Hợp đồng có sẵn |
+| Tech | Phải dùng Go | Team quen |
 | Compliance | PCI-DSS | Payment processing |
-| Team | 5 BE, 3 FE, 1 DevOps | Current headcount |
+| Team | 5 BE, 3 FE, 1 DevOps | Headcount hiện tại |
 
 **Ngoài phạm vi (MVP):** Multi-language, Mobile app (web responsive only), Marketplace (only own products)
 
@@ -456,7 +456,7 @@ resource "aws_budgets_budget" "monthly" {
 
 **Performance:**
 
-| Metric | Target | Measurement |
+| Chỉ số | Mục tiêu | Cách đo |
 |--------|--------|-------------|
 | API Latency P50 | < 100ms | Datadog APM |
 | API Latency P99 | < 500ms | Datadog APM |
@@ -465,24 +465,24 @@ resource "aws_budgets_budget" "monthly" {
 
 **Reliability:**
 
-| Metric | Target | Measurement |
+| Chỉ số | Mục tiêu | Cách đo |
 |--------|--------|-------------|
 | Availability | 99.9% | Uptime monitor |
-| RTO (Recovery Time) | 1 hour | DR drill |
-| RPO (Recovery Point) | 5 minutes | Backup test |
+| RTO (Recovery Time) | 1 giờ | DR drill |
+| RPO (Recovery Point) | 5 phút | Backup test |
 | Error Rate | < 0.1% | Error tracking |
 
 **Scalability:**
 
-| Metric | Target |
+| Chỉ số | Mục tiêu |
 |--------|--------|
 | Concurrent Users | 10,000 |
-| Data Volume | 1TB/year |
-| Traffic Spike | Handle 5x normal |
+| Data Volume | 1TB/năm |
+| Traffic Spike | Xử lý 5x bình thường |
 
 **Security:**
 
-| Requirement | Implementation |
+| Yêu cầu | Cách triển khai |
 |-------------|----------------|
 | Authentication | JWT + refresh token |
 | Authorization | RBAC |
@@ -575,7 +575,7 @@ flowchart TB
 
 **Bảng phân công:**
 
-| Service | Team | Tech | Repo | On-call |
+| Service | Team | Công nghệ | Repo | On-call |
 |---------|------|------|------|---------|
 | API Gateway | DevOps | Kong | infra/kong | devops-oncall |
 | User Service | Team A | Go | services/user | team-a-oncall |
@@ -635,15 +635,15 @@ flowchart LR
 
 **Ma trận so sánh:**
 
-| Criteria | Weight | Monolith | Microservices | Serverless |
+| Tiêu chí | Trọng số | Monolith | Microservices | Serverless |
 |----------|--------|----------|---------------|------------|
 | Time to MVP | 25% | 9 | 6 | 7 |
 | Scalability | 20% | 5 | 9 | 9 |
-| Team expertise | 20% | 7 | 9 | 5 |
-| Operational complexity | 15% | 9 | 5 | 7 |
-| Cost at current scale | 10% | 8 | 6 | 9 |
-| Cost at 10x scale | 10% | 6 | 7 | 4 |
-| **Weighted Score** | | **7.3** | **7.1** | **6.8** |
+| Team quen thuộc | 20% | 7 | 9 | 5 |
+| Độ phức tạp vận hành | 15% | 9 | 5 | 7 |
+| Chi phí ở scale hiện tại | 10% | 8 | 6 | 9 |
+| Chi phí ở 10x scale | 10% | 6 | 7 | 4 |
+| **Điểm có trọng số** | | **7.3** | **7.1** | **6.8** |
 
 **Quyết định:** Chọn **Microservices** vì:
 1. Team đã có kinh nghiệm microservices
@@ -651,11 +651,11 @@ flowchart LR
 3. Expect scale khác nhau (Product reads >> Order writes)
 
 **Hậu quả:**
-| Type | Impact |
+| Loại | Ảnh hưởng |
 |------|--------|
-| Good | Independent scaling, team autonomy, fault isolation |
-| Bad | Network latency, distributed transactions complexity |
-| Mitigation | Start với 4 services, split thêm khi cần |
+| Tốt | Independent scaling, team autonomy, fault isolation |
+| Xấu | Network latency, distributed transactions complexity |
+| Giảm thiểu | Start với 4 services, split thêm khi cần |
 
 ---
 
@@ -665,31 +665,31 @@ flowchart LR
 
 **ADR Template (dùng cho E-Commerce project):**
 
-| Section | Content |
+| Mục | Nội dung |
 |---------|---------|
-| **Title** | ADR-001: Use PostgreSQL as Primary Database |
-| **Status** | Accepted |
-| **Date** | 2024-01-15 |
-| **Context** | Cần database cho e-commerce: ACID cho orders/payments, complex queries, JSON cho product attributes |
-| **Options** | PostgreSQL, MySQL, MongoDB, DynamoDB |
-| **Decision** | PostgreSQL 15 on AWS RDS |
-| **Rationale** | ACID > MongoDB, JSONB tốt, 4/5 devs quen, RDS managed, ~$200/month |
+| **Tiêu đề** | ADR-001: Use PostgreSQL as Primary Database |
+| **Trạng thái** | Accepted |
+| **Ngày** | 2024-01-15 |
+| **Bối cảnh** | Cần database cho e-commerce: ACID cho orders/payments, complex queries, JSON cho product attributes |
+| **Lựa chọn** | PostgreSQL, MySQL, MongoDB, DynamoDB |
+| **Quyết định** | PostgreSQL 15 on AWS RDS |
+| **Lý do** | ACID > MongoDB, JSONB tốt, 4/5 devs quen, RDS managed, ~$200/month |
 
 **Hậu quả:**
 
-| Type | Detail |
+| Loại | Chi tiết |
 |------|--------|
-| ✅ Positive | Strong consistency, rich queries, mature tooling, team familiar |
-| ❌ Negative | Horizontal scaling harder, schema migration cần cẩn thận |
-| ⚠️ Risk | Write bottleneck → Read replicas + caching |
-| ⚠️ Risk | Migration downtime → Expand/contract pattern |
+| ✅ Tích cực | Strong consistency, rich queries, mature tooling, team quen |
+| ❌ Tiêu cực | Horizontal scaling khó hơn, schema migration cần cẩn thận |
+| ⚠️ Rủi ro | Write bottleneck → Read replicas + caching |
+| ⚠️ Rủi ro | Migration downtime → Expand/contract pattern |
 
 **ADR Folder Structure:**
 
-| File | Purpose |
+| File | Mục đích |
 |------|---------|
-| docs/adr/001-use-postgresql.md | Database choice |
-| docs/adr/002-use-redis-for-caching.md | Caching strategy |
+| docs/adr/001-use-postgresql.md | Chọn database |
+| docs/adr/002-use-redis-for-caching.md | Chiến lược caching |
 | docs/adr/003-use-rabbitmq-for-async.md | Message queue |
 | docs/adr/004-use-kong-api-gateway.md | API Gateway |
 | docs/adr/template.md | ADR template |
@@ -702,7 +702,7 @@ flowchart LR
 
 **API Endpoints:**
 
-| Method | Endpoint | Mô tả | Auth |
+| Phương thức | Endpoint | Mô tả | Auth |
 |--------|----------|-------|------|
 | POST | /orders | Tạo đơn hàng mới | Bearer JWT |
 | GET | /orders/{order_id} | Lấy chi tiết đơn hàng | Bearer JWT |
@@ -711,7 +711,7 @@ flowchart LR
 
 **POST /orders - Request:**
 
-| Field | Type | Required | Mô tả |
+| Field | Kiểu | Bắt buộc | Mô tả |
 |-------|------|----------|-------|
 | items | array | ✅ | Danh sách sản phẩm |
 | items[].product_id | string | ✅ | ID sản phẩm |
@@ -724,7 +724,7 @@ flowchart LR
 
 **POST /orders - Response (201):**
 
-| Field | Type | Mô tả |
+| Field | Kiểu | Mô tả |
 |-------|------|-------|
 | id | string | ID đơn hàng (format: ord_xxx) |
 | status | enum | pending, paid, shipped, delivered, cancelled |
@@ -734,15 +734,15 @@ flowchart LR
 
 **Định dạng lỗi trả về:**
 
-| Field | Type | Mô tả |
+| Field | Kiểu | Mô tả |
 |-------|------|-------|
 | error.code | string | Mã lỗi (VD: ORDER_NOT_FOUND) |
 | error.message | string | Mô tả lỗi |
-| error.details | object | Chi tiết lỗi (optional) |
+| error.details | object | Chi tiết lỗi (tùy chọn) |
 
 **Quy ước mã lỗi:**
 
-| HTTP Status | Error Code Pattern | Example |
+| HTTP Status | Mẫu Error Code | Ví dụ |
 |-------------|-------------------|---------|
 | 400 | INVALID_* | INVALID_QUANTITY |
 | 400 | MISSING_* | MISSING_FIELD |
@@ -847,7 +847,7 @@ CREATE INDEX idx_payments_provider_tx ON payments(provider, provider_tx_id);
 
 **Tóm tắt Index:**
 
-| Table | Index | Mục đích |
+| Bảng | Index | Mục đích |
 |-------|-------|----------|
 | users | email (unique) | Tra cứu khi đăng nhập |
 | products | seller_id | Danh sách sản phẩm của seller |
@@ -918,31 +918,31 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **SA quyết định:**
 
-| Decision | Options | Tradeoff |
+| Quyết định | Lựa chọn | Đánh đổi |
 |----------|---------|----------|
-| CI Tool | GitHub Actions, GitLab CI, Jenkins | GitHub Actions = simple, Jenkins = flexible |
+| CI Tool | GitHub Actions, GitLab CI, Jenkins | GitHub Actions = đơn giản, Jenkins = linh hoạt |
 | Container Registry | ECR, GCR, Docker Hub | ECR nếu AWS, GCR nếu GCP |
-| Deploy Strategy | Rolling, Blue-Green, Canary | Canary = safe nhưng complex |
+| Deploy Strategy | Rolling, Blue-Green, Canary | Canary = an toàn nhưng phức tạp |
 | IaC Tool | Terraform, Pulumi, CloudFormation | Terraform = multi-cloud |
 
 **Các giai đoạn Pipeline:**
 
 | Stage | Gate | Fail = |
 |-------|------|--------|
-| Test | Unit + Integration pass | Block PR |
-| Security | No critical vulnerabilities | Block merge |
-| Build | Docker image created | Block deploy |
-| Staging | Smoke test pass | Block production |
+| Test | Unit + Integration đạt | Chặn PR |
+| Security | Không có lỗ hổng critical | Chặn merge |
+| Build | Docker image đã tạo | Chặn deploy |
+| Staging | Smoke test đạt | Chặn production |
 | Canary | Error < 0.1%, P99 < 500ms | Rollback |
-| Production | Manual approval | - |
+| Production | Duyệt thủ công | - |
 
 **Quy tắc promote môi trường:**
 
-| From | To | Requires |
+| Từ | Đến | Yêu cầu |
 |------|-----|----------|
-| PR | Staging | Tests pass, security scan pass, code review approved |
-| Staging | Production | Integration tests pass, manual approval |
-| Canary | Full rollout | Error rate < 0.1%, latency P99 < 500ms for 5 minutes |
+| PR | Staging | Tests đạt, security scan đạt, code review approved |
+| Staging | Production | Integration tests đạt, duyệt thủ công |
+| Canary | Full rollout | Error rate < 0.1%, latency P99 < 500ms trong 5 phút |
 
 ---
 
@@ -952,7 +952,7 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **3 trụ cột:**
 
-| Pillar | Câu hỏi trả lời | Tools |
+| Trụ cột | Câu hỏi trả lời | Tools |
 |--------|-----------------|-------|
 | **Logging** | Request này xảy ra chuyện gì? | ELK, Datadog Logs |
 | **Metrics** | System health như thế nào? | Prometheus + Grafana |
@@ -985,31 +985,31 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **Key Metrics (RED Method):**
 
-| Metric | Description | Alert Threshold |
+| Chỉ số | Mô tả | Ngưỡng Alert |
 |--------|-------------|-----------------|
-| Request Rate | Requests per second | Anomaly detection |
-| Error Rate | % of 5xx responses | > 1% |
-| Duration P50 | Median latency | > 100ms |
-| Duration P99 | 99th percentile latency | > 500ms |
+| Request Rate | Số requests mỗi giây | Anomaly detection |
+| Error Rate | % của 5xx responses | > 1% |
+| Duration P50 | Latency trung vị | > 100ms |
+| Duration P99 | Latency percentile 99 | > 500ms |
 
 **Bố cục Dashboard:**
 
-| Panel | Metric | Giá trị mẫu | Threshold |
+| Panel | Chỉ số | Giá trị mẫu | Ngưỡng |
 |-------|--------|-------------|-----------|
 | Request Rate | RPS | 450/s | Anomaly |
 | Error Rate | % 5xx | 0.02% | > 1% |
-| Latency P50 | Median | 45ms | > 100ms |
-| Latency P99 | 99th percentile | 230ms | > 500ms |
+| Latency P50 | Trung vị | 45ms | > 100ms |
+| Latency P99 | Percentile 99 | 230ms | > 500ms |
 
 **Panel phân tích lỗi:**
-| Status | Count | Ý nghĩa |
+| Status | Số lượng | Ý nghĩa |
 |--------|-------|---------|
 | 400 | 12 | Client error (bad request) |
-| 404 | 5 | Not found |
-| 500 | 2 | Server error → cần investigate |
+| 404 | 5 | Không tìm thấy |
+| 500 | 2 | Server error → cần điều tra |
 
 **Panel sức khỏe Dependencies:**
-| Dependency | Status | Latency |
+| Dependency | Trạng thái | Latency |
 |------------|--------|---------|
 | PostgreSQL | ✅ | 5ms |
 | Redis | ✅ | 1ms |
@@ -1017,22 +1017,22 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **Quy tắc Alert:**
 
-| Alert | Condition | Severity | Action |
+| Alert | Điều kiện | Mức độ | Hành động |
 |-------|-----------|----------|--------|
-| HighErrorRate | Error > 1% for 2m | Critical | Check logs, rollback nếu cần |
-| HighLatency | P99 > 500ms for 5m | Warning | Check DB, cache, dependencies |
-| HighCPU | CPU > 80% for 10m | Warning | Scale up hoặc optimize |
+| HighErrorRate | Error > 1% trong 2 phút | Critical | Check logs, rollback nếu cần |
+| HighLatency | P99 > 500ms trong 5 phút | Warning | Check DB, cache, dependencies |
+| HighCPU | CPU > 80% trong 10 phút | Warning | Scale up hoặc optimize |
 | LowDiskSpace | Disk > 80% | Warning | Clean up hoặc expand |
 
 **Quy trình Runbook:**
 
-| Step | Check | If fail |
+| Bước | Kiểm tra | Nếu fail |
 |------|-------|---------|
-| 1 | Error breakdown (400 vs 500) | 400 = client, 500 = continue |
-| 2 | Recent deploy? | Rollback |
-| 3 | Dependencies health | Fix dependency |
-| 4 | Logs pattern | Fix root cause |
-| 5 | Unknown? | Page lead, escalate |
+| 1 | Phân loại error (400 vs 500) | 400 = client, 500 = tiếp tục |
+| 2 | Deploy gần đây? | Rollback |
+| 3 | Dependencies khỏe không? | Fix dependency |
+| 4 | Pattern trong logs | Fix root cause |
+| 5 | Không rõ? | Gọi lead, escalate |
 
 ---
 
@@ -1042,9 +1042,9 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **Danh sách kiểm tra Security:**
 
-| Category | Check |
+| Hạng mục | Kiểm tra |
 |----------|-------|
-| **Auth** | JWT short expiry (15 min access, 7 day refresh) |
+| **Auth** | JWT hết hạn nhanh (15 phút access, 7 ngày refresh) |
 | | RBAC implemented |
 | | API rate limiting |
 | | Brute force protection |
@@ -1059,59 +1059,33 @@ ALTER TABLE users DROP COLUMN last_name;
 | | Security groups minimal access |
 | | WAF for public endpoints |
 | **Audit** | Audit logging + CloudTrail |
-| | Log retention policy |
+| | Chính sách lưu trữ log |
 
 **Thiết kế RBAC:**
 
-```yaml
-# rbac.yml
-roles:
-  customer:
-    permissions:
-      - products:read
-      - orders:create
-      - orders:read:own
-      - profile:read:own
-      - profile:update:own
-
-  seller:
-    extends: customer
-    permissions:
-      - products:create:own
-      - products:update:own
-      - orders:read:own_products
-
-  admin:
-    permissions:
-      - "*:*"
-
-  support:
-    permissions:
-      - orders:read
-      - orders:update:status
-      - users:read
-      - users:update:status  # ban/unban
-```
+| Role | Quyền | Mô tả |
+|------|-------|-------|
+| **Customer** | products:read | Xem sản phẩm |
+| | orders:create | Tạo đơn hàng |
+| | orders:read:own | Xem đơn của mình |
+| | profile:read/update:own | Quản lý profile |
+| **Seller** | + tất cả Customer | Kế thừa từ Customer |
+| | products:create/update:own | Quản lý sản phẩm mình |
+| | orders:read:own_products | Xem đơn mua sản phẩm mình |
+| **Admin** | *:* | Toàn quyền |
+| **Support** | orders:read | Xem tất cả đơn |
+| | orders:update:status | Cập nhật trạng thái |
+| | users:read/update:status | Xem user, ban/unban |
 
 **Cấu trúc JWT Token:**
 
-```json
-{
-  "header": {
-    "alg": "RS256",
-    "typ": "JWT"
-  },
-  "payload": {
-    "sub": "user_123",
-    "email": "user@example.com",
-    "roles": ["customer"],
-    "iat": 1705312200,
-    "exp": 1705313100,
-    "iss": "auth.example.com",
-    "aud": "api.example.com"
-  }
-}
-```
+| Field | Giá trị | Mô tả |
+|-------|---------|-------|
+| alg | RS256 | Thuật toán ký |
+| sub | user_123 | User ID |
+| roles | ["customer"] | Danh sách roles |
+| exp | 15 phút | Thời gian hết hạn |
+| iss | auth.example.com | Bên phát hành |
 
 ---
 
@@ -1140,18 +1114,18 @@ flowchart TD
 
 **Cổng Release (kiểm tra tự động trước mỗi phase):**
 
-| Phase | Check | Threshold |
+| Giai đoạn | Kiểm tra | Ngưỡng |
 |-------|-------|-----------|
-| **Pre-canary** | All tests pass | ✅ |
-| | Security scan pass | ✅ |
-| | Staging smoke test | ✅ |
+| **Pre-canary** | Tất cả tests đạt | ✅ |
+| | Security scan đạt | ✅ |
+| | Staging smoke test đạt | ✅ |
 | **Canary → 25%** | Error rate | < 0.1% |
 | | Latency P99 | < 500ms |
-| | Duration at canary | > 5 phút |
+| | Thời gian ở canary | > 5 phút |
 | **25% → 100%** | Error rate | < 0.1% |
 | | Latency P99 | < 500ms |
-| | Duration | > 5 phút |
-| | Critical alerts | None |
+| | Thời gian | > 5 phút |
+| | Critical alerts | Không có |
 
 **Quy trình Rollback:**
 
@@ -1198,7 +1172,7 @@ func CreateOrder(ctx context.Context, req CreateOrderRequest) (*Order, error) {
 
 ## 6) 11 quyết định SA phải document
 
-| # | Decision | Example |
+| # | Quyết định | Ví dụ |
 |---|----------|---------|
 | 1 | Service boundaries | "Order và Payment là 2 services riêng" |
 | 2 | Architecture style | "Microservices với event-driven cho async" |
@@ -1244,9 +1218,9 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 
 **Timeline chuẩn:**
 
-| Milestone | Thời điểm | SA làm gì |
+| Mốc | Thời điểm | SA làm gì |
 |-----------|-----------|-----------|
-| Feature Freeze | T-2 tuần | Review tất cả features đã merge, đánh giá risk |
+| Feature Freeze | T-2 tuần | Review tất cả features đã merge, đánh giá rủi ro |
 | Code Freeze | T-1 tuần | Chỉ accept critical bug fixes, review mọi PR |
 | Cutoff Deploy | T-2 ngày | Deploy bản cuối lên staging, full regression test |
 | Release | T-0 | Deploy production, monitor 24h |
@@ -1256,56 +1230,56 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 - [ ] Tất cả API specs đã finalize
 - [ ] Tất cả database migrations đã test trên staging
 - [ ] Performance test đạt target NFRs
-- [ ] Security scan pass
+- [ ] Security scan đạt
 - [ ] Rollback plan đã document và test
 
 **Danh sách kiểm tra Cutoff Deploy:**
 
-| Category | Check |
+| Hạng mục | Kiểm tra |
 |----------|-------|
-| **Code** | All tests pass |
-| | Code coverage > threshold |
-| | No critical Sonar issues |
-| | Dependencies updated |
+| **Code** | Tất cả tests đạt |
+| | Code coverage đạt ngưỡng |
+| | Không có Sonar issues critical |
+| | Dependencies đã cập nhật |
 | **Infra** | Changes đã apply staging trước 3 ngày |
-| | Auto-scaling configured |
-| | Backup verified |
+| | Auto-scaling đã cấu hình |
+| | Backup đã xác minh |
 | | DR tested trong 30 ngày |
-| **Monitoring** | Alerts configured |
-| | Dashboards ready |
-| | On-call confirmed |
-| | Runbooks updated |
-| **Rollback** | Script tested |
-| | Previous version available |
+| **Monitoring** | Alerts đã cấu hình |
+| | Dashboards sẵn sàng |
+| | On-call đã xác nhận |
+| | Runbooks đã cập nhật |
+| **Rollback** | Script đã test |
+| | Phiên bản trước có sẵn |
 | | DB rollback plan ready |
-| | Feature flags configured |
+| | Feature flags đã cấu hình |
 
 ### 8.2 Các điểm quyết định quan trọng
 
 **Khi nào SA PHẢI có mặt:**
 
-| Situation | Tại sao critical | SA action |
+| Tình huống | Tại sao critical | SA hành động |
 |-----------|------------------|-----------|
-| **Architecture Change** | Ảnh hưởng toàn hệ thống | Review, ADR, approval |
-| **New Integration** | Phụ thuộc bên ngoài | Review API, failure modes |
-| **Database Schema Change** | Không rollback được dễ | Migration strategy, backward compatibility |
+| **Thay đổi Architecture** | Ảnh hưởng toàn hệ thống | Review, ADR, approval |
+| **Integration mới** | Phụ thuộc bên ngoài | Review API, failure modes |
+| **Thay đổi Database Schema** | Không rollback được dễ | Migration strategy, backward compatibility |
 | **Security Incident** | Ảnh hưởng business | Điều phối xử lý, post-mortem |
-| **Performance Degradation** | Ảnh hưởng user | Tìm nguyên nhân, xử lý ngay |
+| **Performance xuống** | Ảnh hưởng user | Tìm nguyên nhân, xử lý ngay |
 | **Major Release** | Rủi ro cao | Quyết định Go/No-go |
 
 ### 8.3 Go/No-Go Decision Framework
 
 **Trước mỗi major release, SA phải trả lời:**
 
-| Question | Go | No-Go |
+| Câu hỏi | Go | No-Go |
 |----------|-----|-------|
-| Tất cả critical bugs fixed? | ✅ | ❌ |
-| Performance test pass NFRs? | ✅ | ❌ |
-| Security scan clean? | ✅ | ❌ |
-| Rollback tested? | ✅ | ❌ |
-| On-call team ready? | ✅ | ❌ |
-| Stakeholders informed? | ✅ | ❌ |
-| Monitoring ready? | ✅ | ❌ |
+| Tất cả critical bugs đã fix? | ✅ | ❌ |
+| Performance test đạt NFRs? | ✅ | ❌ |
+| Security scan sạch? | ✅ | ❌ |
+| Rollback đã test? | ✅ | ❌ |
+| On-call team sẵn sàng? | ✅ | ❌ |
+| Stakeholders đã thông báo? | ✅ | ❌ |
+| Monitoring sẵn sàng? | ✅ | ❌ |
 
 **Nếu 1 item = No-Go → KHÔNG release.**
 
@@ -1334,82 +1308,82 @@ flowchart TD
 
 ### 8.5 Post-Mortem Template
 
-| Section | Content |
+| Mục | Nội dung |
 |---------|---------|
-| **Title** | [Incident name] |
-| **Duration** | Start → End (X hours) |
-| **Impact** | X% users, Y orders failed |
-| **Root Cause** | 1-2 câu |
-| **Timeline** | Alert → Ack → Page → Fix → Resolve |
-| **What Went Wrong** | Bullet points |
-| **What Went Right** | Bullet points |
-| **Action Items** | Action / Owner / Due Date |
-| **Lessons Learned** | Key takeaways |
+| **Tiêu đề** | [Tên incident] |
+| **Thời lượng** | Bắt đầu → Kết thúc (X giờ) |
+| **Ảnh hưởng** | X% users, Y orders fail |
+| **Nguyên nhân gốc** | 1-2 câu |
+| **Timeline** | Alert → Xác nhận → Gọi người → Fix → Xong |
+| **Sai ở đâu** | Các điểm |
+| **Đúng ở đâu** | Các điểm |
+| **Việc cần làm** | Việc / Người / Deadline |
+| **Bài học** | Những điểm rút ra |
 
 ### 8.6 Thời điểm Capacity Planning
 
 **SA phải xem xét capacity khi:**
 
-| Trigger | Action |
+| Dấu hiệu | Hành động |
 |---------|--------|
 | Traffic tăng > 50% trong 1 tháng | Scale up hoặc optimize |
-| CPU usage avg > 70% | Add instances hoặc optimize |
-| Database connections > 80% pool | Increase pool hoặc add replica |
+| CPU usage avg > 70% | Thêm instances hoặc optimize |
+| Database connections > 80% pool | Tăng pool hoặc thêm replica |
 | Disk usage > 70% | Clean up hoặc expand |
-| Error rate tăng | Investigate bottleneck |
-| Upcoming campaign/event | Pre-scale |
+| Error rate tăng | Điều tra bottleneck |
+| Sắp có campaign/event | Pre-scale |
 
 ### 8.7 Technical Debt Review
 
 **Danh sách review hàng quý:**
 
-| Category | Check | Action nếu fail |
+| Hạng mục | Kiểm tra | Hành động nếu fail |
 |----------|-------|------------------|
-| Dependencies | Có outdated > 6 tháng? | Update plan |
+| Dependencies | Có outdated > 6 tháng? | Lên kế hoạch update |
 | Security | Có vulnerabilities? | Patch ngay |
 | Performance | Latency tăng so với baseline? | Optimize |
-| Code | Có modules complexity cao? | Refactor plan |
-| Infra | Có deprecated services? | Migration plan |
+| Code | Có modules complexity cao? | Lên kế hoạch refactor |
+| Infra | Có deprecated services? | Lên kế hoạch migration |
 | Documentation | ADRs có outdated? | Update |
 
 ### 8.8 Các mốc thông báo
 
 **SA phải thông báo:**
 
-| When | To Whom | What |
+| Khi nào | Cho ai | Nội dung |
 |------|---------|------|
 | Tuần trước sprint | Tech Lead | Architecture decisions cho sprint |
 | Sau major decision | Team | ADR và rationale |
-| Trước release | Stakeholders | Risk assessment, go/no-go |
-| Sau incident | All | Post-mortem findings |
-| Monthly | Management | Technical health report |
-| Quarterly | All teams | Architecture roadmap |
+| Trước release | Stakeholders | Đánh giá rủi ro, go/no-go |
+| Sau incident | Tất cả | Post-mortem findings |
+| Hàng tháng | Management | Technical health report |
+| Hàng quý | Tất cả teams | Architecture roadmap |
 
 ### 8.9 Red Flags - Khi nào phải escalate
 
 **Escalate ngay nếu:**
 
-| Red Flag | Escalate to |
+| Dấu hiệu nguy hiểm | Escalate cho |
 |----------|-------------|
-| Security breach suspected | Security team + Management |
-| Data loss | Management + Legal (nếu PII) |
+| Nghi ngờ security breach | Security team + Management |
+| Mất dữ liệu | Management + Legal (nếu PII) |
 | Performance < 50% baseline | Tech Lead + Management |
-| External service down > 1h | Vendor + Management |
+| External service down > 1 giờ | Vendor + Management |
 | Critical bug không fix được | Tech Lead + Product |
 | Team conflict về architecture | Engineering Manager |
-| Budget overrun > 20% | Management + Finance |
+| Budget vượt > 20% | Management + Finance |
 
 ### 8.10 SA Anti-Patterns (Tránh làm)
 
 | Anti-Pattern | Hậu quả | Làm thay vì |
 |--------------|---------|-------------|
 | Design trong silo | Team không hiểu, implement sai | Involve team từ đầu |
-| Over-engineering | Chậm delivery, complexity | Start simple, evolve |
-| Ignore technical debt | System degrade | Regular review |
-| Skip documentation | Knowledge loss | Document as you go |
-| Assume thay vì verify | Bugs in production | Test assumptions |
-| Blame thay vì learn | Team morale down | Blameless post-mortem |
-| Micromanage implementation | Team frustrated | Trust nhưng verify |
+| Over-engineering | Chậm delivery, phức tạp | Bắt đầu đơn giản, phát triển dần |
+| Bỏ qua technical debt | System xuống cấp | Review định kỳ |
+| Bỏ qua documentation | Mất kiến thức | Viết document ngay khi làm |
+| Assume thay vì verify | Bugs trong production | Test các giả định |
+| Blame thay vì learn | Team mất tinh thần | Blameless post-mortem |
+| Micromanage implementation | Team bực bội | Trust nhưng verify |
 
 ---
 
@@ -1447,30 +1421,30 @@ flowchart TD
 
 ### 12 Steps Quick Reference
 
-| Step | Output | Done khi |
+| Bước | Output | Xong khi |
 |------|--------|----------|
 | 1. Scope | Scope doc | PO sign-off |
-| 2. NFRs | NFR spec với số | Stakeholders agree |
-| 3. Context Diagram | System boundary | All externals listed |
-| 4. Component Diagram | Services + owners | Each box có owner |
-| 5. Compare Options | Decision matrix | Option chosen với rationale |
-| 6. ADRs | Decision docs | All major decisions documented |
-| 7. API Design | Endpoints + schemas | FE/BE align |
-| 8. Database | ERD + indexes | Migration plan ready |
-| 9. CI/CD | Pipeline config | Auto deploy working |
+| 2. NFRs | NFR spec có số | Stakeholders đồng ý |
+| 3. Context Diagram | System boundary | Tất cả externals đã list |
+| 4. Component Diagram | Services + owners | Mỗi box có owner |
+| 5. Compare Options | Decision matrix | Đã chọn option với rationale |
+| 6. ADRs | Decision docs | Tất cả major decisions đã viết |
+| 7. API Design | Endpoints + schemas | FE/BE đồng bộ |
+| 8. Database | ERD + indexes | Migration plan sẵn sàng |
+| 9. CI/CD | Pipeline config | Auto deploy hoạt động |
 | 10. Observability | Dashboards + alerts | On-call có thể debug |
-| 11. Security | Checklist pass | No critical vulnerabilities |
-| 12. Release | Canary + rollback | Safe deploy process |
+| 11. Security | Checklist đạt | Không có lỗ hổng critical |
+| 12. Release | Canary + rollback | Quy trình deploy an toàn |
 
 ### Dấu hiệu cần hành động ngay
 
-| Signal | Action |
+| Dấu hiệu | Hành động |
 |--------|--------|
-| Error rate > 1% | Investigate ngay |
+| Error rate > 1% | Điều tra ngay |
 | Latency P99 tăng 2x | Check bottleneck |
 | DB CPU > 80% | Scale hoặc optimize |
-| No rollback plan | Viết trước khi deploy |
-| Team không hiểu architecture | Schedule walkthrough |
+| Không có rollback plan | Viết trước khi deploy |
+| Team không hiểu architecture | Lên lịch walkthrough |
 
 ### SA vs Tech Lead - 1 câu
 
