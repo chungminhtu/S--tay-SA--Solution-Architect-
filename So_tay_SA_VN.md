@@ -413,24 +413,26 @@ resource "aws_budgets_budget" "monthly" {
 
 ## 5) SA Playbook: 12 bước từ Day 0 đến Production
 
+**Bài toán xuyên suốt:** Startup muốn build E-Commerce Platform cho phép users mua hàng, thanh toán, track đơn hàng. Team có 5 BE + 3 FE + 1 DevOps, timeline 3 tháng, budget $50k/tháng. SA phải giải quyết từ Day 0 đến khi chạy production.
+
+> Mỗi bước dưới đây đều dùng bài toán này làm ví dụ. SA đi từng bước, output của bước trước là input của bước sau.
+
+---
+
 ### Bước 1 — Document Scope & Constraints
 
 **Tại sao quan trọng:** Không có scope rõ thì team sẽ build sai thứ hoặc build quá nhiều.
 
-**Template:**
+**Scope Document:**
 
-```markdown
-# Project: E-Commerce Platform
+| Section | Content |
+|---------|---------|
+| **Project** | E-Commerce Platform |
+| **Objective** | Users mua hàng online, thanh toán, track đơn hàng |
+| **Success Metrics** | 10,000 orders/day, Conversion > 2%, Cart abandonment < 70% |
 
-## Business Objective
-Cho phép users mua hàng online, thanh toán, và track đơn hàng.
+**Constraints:**
 
-## Success Metrics
-- 10,000 orders/day trong tháng đầu
-- Conversion rate > 2%
-- Cart abandonment < 70%
-
-## Constraints
 | Type | Constraint | Reason |
 |------|------------|--------|
 | Timeline | MVP trong 3 tháng | Contract với investor |
@@ -440,11 +442,7 @@ Cho phép users mua hàng online, thanh toán, và track đơn hàng.
 | Compliance | PCI-DSS | Payment processing |
 | Team | 5 BE, 3 FE, 1 DevOps | Current headcount |
 
-## Out of Scope (for MVP)
-- Multi-language support
-- Mobile app (web responsive only)
-- Marketplace (only own products)
-```
+**Out of Scope (for MVP):** Multi-language, Mobile app (web responsive only), Marketplace (only own products)
 
 **Done when:** PO sign-off
 
@@ -454,51 +452,46 @@ Cho phép users mua hàng online, thanh toán, và track đơn hàng.
 
 **Tại sao quan trọng:** Không có số thì không biết design đủ hay chưa.
 
-**Template:**
+**NFR Specification cho E-Commerce:**
 
-```markdown
-# NFR Specification
+**Performance:**
 
-## Performance
-| Metric | Target | Measurement | Priority |
-|--------|--------|-------------|----------|
-| API Latency P50 | < 100ms | Datadog APM | Must |
-| API Latency P99 | < 500ms | Datadog APM | Must |
-| Page Load Time | < 3s | Lighthouse | Must |
-| Throughput | 500 req/s | Load test | Should |
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| API Latency P50 | < 100ms | Datadog APM |
+| API Latency P99 | < 500ms | Datadog APM |
+| Page Load Time | < 3s | Lighthouse |
+| Throughput | 500 req/s | Load test |
 
-## Reliability
-| Metric | Target | Measurement | Priority |
-|--------|--------|-------------|----------|
-| Availability | 99.9% | Uptime monitor | Must |
-| RTO | 1 hour | DR drill | Must |
-| RPO | 5 minutes | Backup test | Must |
-| Error Rate | < 0.1% | Error tracking | Must |
+**Reliability:**
 
-## Scalability
-| Metric | Target | Measurement | Priority |
-|--------|--------|-------------|----------|
-| Concurrent Users | 10,000 | Load test | Should |
-| Data Volume | 1TB/year | Storage metrics | Should |
-| Traffic Spike | 5x normal | Auto-scaling test | Should |
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Availability | 99.9% | Uptime monitor |
+| RTO (Recovery Time) | 1 hour | DR drill |
+| RPO (Recovery Point) | 5 minutes | Backup test |
+| Error Rate | < 0.1% | Error tracking |
 
-## Security
-| Requirement | Implementation | Priority |
-|-------------|----------------|----------|
-| Authentication | JWT + refresh token | Must |
-| Authorization | RBAC | Must |
-| Data Encryption | TLS 1.3, AES-256 at rest | Must |
-| Secrets | AWS Secrets Manager | Must |
-| Audit | CloudTrail + app logs | Must |
+**Scalability:**
 
-## Cost
-| Metric | Target | Priority |
-|--------|--------|----------|
-| Monthly infra | < $50k | Must |
-| Cost per order | < $0.10 | Should |
-```
+| Metric | Target |
+|--------|--------|
+| Concurrent Users | 10,000 |
+| Data Volume | 1TB/year |
+| Traffic Spike | Handle 5x normal |
 
-**Done when:** Stakeholders sign-off, mỗi dòng có số hoặc có plan để lấy số
+**Security:**
+
+| Requirement | Implementation |
+|-------------|----------------|
+| Authentication | JWT + refresh token |
+| Authorization | RBAC |
+| Encryption | TLS 1.3, AES-256 at rest |
+| Secrets | AWS Secrets Manager |
+
+**Cost:** Monthly < $50k, Cost per order < $0.10
+
+**Done when:** Stakeholders sign-off, mỗi dòng có số
 
 ---
 
@@ -670,75 +663,36 @@ flowchart LR
 
 **Tại sao quan trọng:** 6 tháng sau không ai nhớ tại sao chọn PostgreSQL.
 
-**Template:**
+**ADR Template (dùng cho E-Commerce project):**
 
-```markdown
-# ADR-001: Use PostgreSQL as Primary Database
+| Section | Content |
+|---------|---------|
+| **Title** | ADR-001: Use PostgreSQL as Primary Database |
+| **Status** | Accepted |
+| **Date** | 2024-01-15 |
+| **Context** | Cần database cho e-commerce: ACID cho orders/payments, complex queries, JSON cho product attributes |
+| **Options** | PostgreSQL, MySQL, MongoDB, DynamoDB |
+| **Decision** | PostgreSQL 15 on AWS RDS |
+| **Rationale** | ACID > MongoDB, JSONB tốt, 4/5 devs quen, RDS managed, ~$200/month |
 
-## Status
-Accepted
+**Consequences:**
 
-## Date
-2024-01-15
+| Type | Detail |
+|------|--------|
+| ✅ Positive | Strong consistency, rich queries, mature tooling, team familiar |
+| ❌ Negative | Horizontal scaling harder, schema migration cần cẩn thận |
+| ⚠️ Risk | Write bottleneck → Read replicas + caching |
+| ⚠️ Risk | Migration downtime → Expand/contract pattern |
 
-## Context
-Cần chọn database cho e-commerce platform.
+**ADR Folder Structure:**
 
-Requirements:
-- ACID transactions cho orders/payments
-- Complex queries cho reporting
-- JSON support cho flexible product attributes
-- Team familiarity
-
-Options considered:
-1. PostgreSQL
-2. MySQL
-3. MongoDB
-4. DynamoDB
-
-## Decision
-Use PostgreSQL 15 on AWS RDS.
-
-## Rationale
-- ACID: PostgreSQL > MongoDB cho transactional workloads
-- JSON: PostgreSQL JSONB performance tốt
-- Team: 4/5 devs có PostgreSQL experience
-- AWS RDS: Managed, auto-backup, easy replica
-- Cost: RDS db.r6g.large = ~$200/month
-
-## Consequences
-
-### Positive
-- Strong consistency guarantee
-- Rich querying capabilities
-- Mature ecosystem, good tooling
-- Team already familiar
-
-### Negative
-- Horizontal scaling harder than NoSQL
-- Need to manage schema migrations carefully
-- RDS cost higher than self-managed
-
-### Risks & Mitigations
-| Risk | Mitigation |
-|------|------------|
-| Write bottleneck at scale | Read replicas, caching, consider sharding later |
-| Migration downtime | Use expand/contract pattern, test on staging |
-
-## Related ADRs
-- ADR-002: Use Redis for caching
-- ADR-005: Database migration strategy
-```
-
-**ADR Naming Convention:**
-```
-docs/adr/
-├── 001-use-postgresql.md
-├── 002-use-redis-for-caching.md
-├── 003-use-rabbitmq-for-async.md
-├── 004-use-kong-api-gateway.md
-└── template.md
-```
+| File | Purpose |
+|------|---------|
+| docs/adr/001-use-postgresql.md | Database choice |
+| docs/adr/002-use-redis-for-caching.md | Caching strategy |
+| docs/adr/003-use-rabbitmq-for-async.md | Message queue |
+| docs/adr/004-use-kong-api-gateway.md | API Gateway |
+| docs/adr/template.md | ADR template |
 
 ---
 
@@ -1088,37 +1042,24 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **Security Checklist:**
 
-```markdown
-## Authentication & Authorization
-- [ ] JWT tokens with short expiry (15 min access, 7 day refresh)
-- [ ] RBAC implemented
-- [ ] API rate limiting
-- [ ] Brute force protection (account lockout)
-
-## Secrets Management
-- [ ] No secrets in code/config files
-- [ ] Using AWS Secrets Manager / HashiCorp Vault
-- [ ] Secrets rotated regularly
-- [ ] Different secrets per environment
-
-## Data Protection
-- [ ] TLS 1.3 for all traffic
-- [ ] Data encrypted at rest (RDS, S3)
-- [ ] PII fields encrypted at application level
-- [ ] Sensitive data masked in logs
-
-## Network Security
-- [ ] VPC with private subnets for databases
-- [ ] Security groups with minimal access
-- [ ] WAF for public endpoints
-- [ ] No public IPs for internal services
-
-## Audit & Compliance
-- [ ] Audit logging enabled
-- [ ] CloudTrail enabled
-- [ ] Log retention policy
-- [ ] Access reviews quarterly
-```
+| Category | Check |
+|----------|-------|
+| **Auth** | JWT short expiry (15 min access, 7 day refresh) |
+| | RBAC implemented |
+| | API rate limiting |
+| | Brute force protection |
+| **Secrets** | No secrets in code/config |
+| | AWS Secrets Manager / Vault |
+| | Secrets rotated regularly |
+| **Data** | TLS 1.3 for all traffic |
+| | Encrypt at rest (RDS, S3) |
+| | PII encrypted at app level |
+| | Sensitive data masked in logs |
+| **Network** | VPC private subnets for DB |
+| | Security groups minimal access |
+| | WAF for public endpoints |
+| **Audit** | Audit logging + CloudTrail |
+| | Log retention policy |
 
 **RBAC Design:**
 
@@ -1294,29 +1235,9 @@ func CreateOrder(ctx context.Context, req CreateOrderRequest) (*Order, error) {
 
 ---
 
-## 8) Glossary
+## 8) SA Survival Guide: Critical Moments trong Project
 
-| Term | Meaning |
-|------|---------|
-| NFR | Non-Functional Requirements: latency, availability, security targets |
-| ADR | Architecture Decision Record: documented decision với context và consequences |
-| OpenAPI | Spec format để describe REST APIs (trước gọi là Swagger) |
-| CI/CD | Continuous Integration/Deployment: automated build → test → deploy |
-| IaC | Infrastructure as Code: Terraform, Pulumi, CloudFormation |
-| Observability | Logging + Metrics + Tracing |
-| Runbook | Step-by-step guide để handle specific incident |
-| SLO/SLA/SLI | Service Level Objective/Agreement/Indicator |
-| RTO | Recovery Time Objective: max downtime allowed |
-| RPO | Recovery Point Objective: max data loss allowed |
-| Circuit Breaker | Pattern để prevent cascade failures |
-| Canary | Deployment strategy: release to small % first |
-| Feature Flag | Toggle để enable/disable features without deploy |
-
----
-
-## 9) SA Survival Guide: Critical Moments trong Project
-
-### 9.1 Code Freeze & Cutoff Deploy
+### 8.1 Code Freeze & Cutoff Deploy
 
 **Code Freeze là gì?**
 Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug fixes critical.
@@ -1338,37 +1259,28 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 - [ ] Security scan pass
 - [ ] Rollback plan đã document và test
 
-**Checklist Cutoff Deploy:**
+**Cutoff Deploy Checklist:**
 
-```markdown
-## Pre-deploy Checklist
+| Category | Check |
+|----------|-------|
+| **Code** | All tests pass |
+| | Code coverage > threshold |
+| | No critical Sonar issues |
+| | Dependencies updated |
+| **Infra** | Changes đã apply staging trước 3 ngày |
+| | Auto-scaling configured |
+| | Backup verified |
+| | DR tested trong 30 ngày |
+| **Monitoring** | Alerts configured |
+| | Dashboards ready |
+| | On-call confirmed |
+| | Runbooks updated |
+| **Rollback** | Script tested |
+| | Previous version available |
+| | DB rollback plan ready |
+| | Feature flags configured |
 
-### Code Quality
-- [ ] All tests pass
-- [ ] Code coverage > threshold
-- [ ] No critical/high Sonar issues
-- [ ] Dependencies updated, no vulnerabilities
-
-### Infrastructure
-- [ ] Infra changes đã apply staging trước 3 ngày
-- [ ] Auto-scaling policies configured
-- [ ] Backup verified
-- [ ] DR tested trong 30 ngày qua
-
-### Monitoring
-- [ ] Alerts configured
-- [ ] Dashboards ready
-- [ ] On-call rotation confirmed
-- [ ] Runbooks updated
-
-### Rollback
-- [ ] Rollback script tested
-- [ ] Previous version available
-- [ ] Database rollback plan (nếu có migration)
-- [ ] Feature flags configured cho quick disable
-```
-
-### 9.2 Critical Decision Points
+### 8.2 Critical Decision Points
 
 **Khi nào SA PHẢI có mặt:**
 
@@ -1381,7 +1293,7 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 | **Performance Degradation** | User impact | Root cause, immediate mitigation |
 | **Major Release** | High risk | Go/No-go decision |
 
-### 9.3 Go/No-Go Decision Framework
+### 8.3 Go/No-Go Decision Framework
 
 **Trước mỗi major release, SA phải answer:**
 
@@ -1397,7 +1309,7 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 
 **Nếu 1 item = No-Go → KHÔNG release.**
 
-### 9.4 Incident Response - SA Role
+### 8.4 Incident Response - SA Role
 
 ```mermaid
 flowchart TD
@@ -1420,7 +1332,7 @@ flowchart TD
 4. **Communicate** - update stakeholders
 5. **Document** - timeline, actions, decisions
 
-### 9.5 Post-Mortem Template
+### 8.5 Post-Mortem Template
 
 | Section | Content |
 |---------|---------|
@@ -1434,7 +1346,7 @@ flowchart TD
 | **Action Items** | Action / Owner / Due Date |
 | **Lessons Learned** | Key takeaways |
 
-### 9.6 Capacity Planning Moments
+### 8.6 Capacity Planning Moments
 
 **SA phải review capacity khi:**
 
@@ -1447,7 +1359,7 @@ flowchart TD
 | Error rate tăng | Investigate bottleneck |
 | Upcoming campaign/event | Pre-scale |
 
-### 9.7 Technical Debt Review
+### 8.7 Technical Debt Review
 
 **Quarterly review checklist:**
 
@@ -1460,7 +1372,7 @@ flowchart TD
 | Infra | Có deprecated services? | Migration plan |
 | Documentation | ADRs có outdated? | Update |
 
-### 9.8 Communication Checkpoints
+### 8.8 Communication Checkpoints
 
 **SA phải communicate:**
 
@@ -1473,7 +1385,7 @@ flowchart TD
 | Monthly | Management | Technical health report |
 | Quarterly | All teams | Architecture roadmap |
 
-### 9.9 Red Flags - Khi nào phải escalate
+### 8.9 Red Flags - Khi nào phải escalate
 
 **Escalate ngay nếu:**
 
@@ -1487,7 +1399,7 @@ flowchart TD
 | Team conflict về architecture | Engineering Manager |
 | Budget overrun > 20% | Management + Finance |
 
-### 9.10 SA Anti-Patterns (Tránh làm)
+### 8.10 SA Anti-Patterns (Tránh làm)
 
 | Anti-Pattern | Hậu quả | Làm thay vì |
 |--------------|---------|-------------|
@@ -1501,7 +1413,7 @@ flowchart TD
 
 ---
 
-## 10) TL;DR - SA Cheat Sheet
+## 9) TL;DR - SA Cheat Sheet
 
 ### SA làm gì trong 1 ngày
 
