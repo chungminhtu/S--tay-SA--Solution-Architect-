@@ -1705,47 +1705,480 @@ COMMIT;
 | SendGrid | External | 5s | 5x async | Yes, 10 fails | Queue later |
 | Internal | Internal | 2s | 2x | Yes, 5 fails | Error |
 
-### 10.7 Weekly Checklist (12 tuần)
+### 10.7 Project Roadmap (12 tuần)
 
-**Week 1-2: Foundation**
-- [ ] Finalize NFRs
-- [ ] Setup AWS, VPC
-- [ ] POC VNPay
-- [ ] Context + Component diagrams
-- [ ] Database schema v1
+**Visual Timeline:**
 
-**Week 3-4: Core Services**
-- [ ] User Service MVP
-- [ ] Product Service MVP
-- [ ] Order Service MVP
-- [ ] OpenAPI specs
-- [ ] FE-BE integration start
+```mermaid
+gantt
+    title E-Commerce MVP Roadmap
+    dateFormat  YYYY-MM-DD
+    section Foundation
+    NFRs & Architecture     :f1, 2024-01-15, 7d
+    AWS/VPC Setup          :f2, 2024-01-15, 5d
+    VNPay POC              :f3, 2024-01-17, 7d
+    DB Schema v1           :f4, 2024-01-22, 5d
+    section Core Services
+    User Service           :c1, 2024-01-29, 10d
+    Product Service        :c2, 2024-01-29, 10d
+    Order Service          :c3, 2024-02-01, 10d
+    OpenAPI Specs          :c4, 2024-02-05, 5d
+    section Integrations
+    VNPay Integration      :i1, 2024-02-12, 7d
+    Momo Integration       :i2, 2024-02-15, 5d
+    GHN Shipping           :i3, 2024-02-19, 5d
+    Notifications          :i4, 2024-02-19, 5d
+    section Hardening
+    Load Testing           :h1, 2024-02-26, 5d
+    Security Review        :h2, 2024-02-26, 7d
+    Monitoring Setup       :h3, 2024-03-01, 5d
+    section Launch
+    Staging Deploy         :l1, 2024-03-11, 3d
+    UAT                    :l2, 2024-03-14, 5d
+    Bug Fixes              :l3, 2024-03-18, 4d
+    Production Deploy      :crit, l4, 2024-03-25, 2d
+    Hypercare              :l5, 2024-03-27, 7d
+```
 
-**Week 5-6: Integrations**
-- [ ] VNPay complete
-- [ ] Momo integration
-- [ ] GHN shipping
-- [ ] Notification service
+**Team Allocation Timeline:**
 
-**Week 7-8: Hardening**
-- [ ] Load test (600 req/s)
-- [ ] Security review
-- [ ] Monitoring dashboards
-- [ ] Alert rules
+```mermaid
+gantt
+    title Team Workstreams
+    dateFormat  YYYY-MM-DD
+    section DevOps
+    AWS Setup              :2024-01-15, 5d
+    CI/CD Pipeline         :2024-01-20, 7d
+    Monitoring             :2024-02-26, 10d
+    Production Deploy      :2024-03-25, 5d
+    section Team A (3 BE)
+    User Service           :2024-01-29, 14d
+    Product Service        :2024-01-29, 14d
+    Notification Svc       :2024-02-19, 10d
+    section Team B (2 BE)
+    VNPay POC              :2024-01-17, 7d
+    Order Service          :2024-02-01, 14d
+    Payment Integration    :2024-02-12, 14d
+    section FE Team (3)
+    UI Components          :2024-01-22, 14d
+    API Integration        :2024-02-05, 21d
+    UAT Support            :2024-03-14, 10d
+```
 
-**Week 9-10: Staging**
-- [ ] Full staging deploy
-- [ ] UAT với PO
-- [ ] Bug fixes
-- [ ] Runbooks
+**Milestone Gates:**
 
-**Week 11-12: Launch**
-- [ ] Production deploy
-- [ ] Canary rollout
-- [ ] Go/No-Go
-- [ ] 24h monitoring
+```mermaid
+flowchart LR
+    subgraph Week2["Week 2"]
+        M1[🚪 Gate 1<br/>Architecture Approved]
+    end
+    subgraph Week4["Week 4"]
+        M2[🚪 Gate 2<br/>APIs Defined]
+    end
+    subgraph Week6["Week 6"]
+        M3[🚪 Gate 3<br/>Integrations Work]
+    end
+    subgraph Week8["Week 8"]
+        M4[🚪 Gate 4<br/>Load Test Pass]
+    end
+    subgraph Week10["Week 10"]
+        M5[🚪 Gate 5<br/>UAT Complete]
+    end
+    subgraph Week12["Week 12"]
+        M6[🚀 LAUNCH]
+    end
 
-### 10.8 Cost Breakdown
+    M1 --> M2 --> M3 --> M4 --> M5 --> M6
+
+    style M1 fill:#e6f3ff
+    style M2 fill:#e6f3ff
+    style M3 fill:#fff3e6
+    style M4 fill:#fff3e6
+    style M5 fill:#e6ffe6
+    style M6 fill:#ccffcc
+```
+
+**Gate Criteria:**
+
+| Gate | Criteria | Blocker nếu fail |
+|------|----------|------------------|
+| Gate 1 | NFRs signed, diagrams reviewed, VNPay POC works | Không có architecture → team code lung tung |
+| Gate 2 | OpenAPI specs done, DB schema approved | FE/BE không sync → integration hell |
+| Gate 3 | Payment + Shipping APIs work end-to-end | Core flow broken → không có product |
+| Gate 4 | 600 req/s, P99 < 500ms, no critical bugs | Performance issues in prod |
+| Gate 5 | PO sign-off, all critical bugs fixed | User-facing issues |
+| Launch | Go/No-Go checklist 100% | 🔥 Production fire |
+
+### 10.8 Infrastructure Diagram
+
+```mermaid
+flowchart TB
+    subgraph Internet
+        User[👤 Users]
+        Admin[👨‍💼 Admin]
+    end
+
+    subgraph AWS["AWS ap-southeast-1"]
+        subgraph Public["Public Subnet"]
+            ALB[Application Load Balancer]
+            NAT[NAT Gateway]
+        end
+
+        subgraph Private["Private Subnet - AZ1"]
+            subgraph EKS["EKS Cluster"]
+                Kong[Kong API Gateway]
+                UserSvc[User Service]
+                ProductSvc[Product Service]
+                OrderSvc[Order Service]
+                PaymentSvc[Payment Service]
+                NotifSvc[Notification Service]
+            end
+        end
+
+        subgraph Data["Data Layer - Multi-AZ"]
+            RDS[(PostgreSQL<br/>Primary)]
+            RDS2[(PostgreSQL<br/>Standby)]
+            Redis[(ElastiCache<br/>Redis)]
+        end
+
+        subgraph Storage["Storage"]
+            S3[(S3 Bucket<br/>Images)]
+            CF[CloudFront CDN]
+        end
+
+        subgraph Monitor["Monitoring"]
+            CW[CloudWatch]
+            DD[Datadog Agent]
+        end
+    end
+
+    subgraph External["External Services"]
+        VNPay[VNPay API]
+        Momo[Momo API]
+        GHN[GHN Shipping]
+        SG[SendGrid]
+    end
+
+    User --> CF
+    User --> ALB
+    Admin --> ALB
+    CF --> S3
+
+    ALB --> Kong
+    Kong --> UserSvc
+    Kong --> ProductSvc
+    Kong --> OrderSvc
+
+    UserSvc --> RDS
+    ProductSvc --> RDS
+    ProductSvc --> Redis
+    OrderSvc --> RDS
+    OrderSvc --> PaymentSvc
+    PaymentSvc --> VNPay
+    PaymentSvc --> Momo
+    OrderSvc --> GHN
+    NotifSvc --> SG
+
+    RDS -.->|Replication| RDS2
+
+    EKS --> NAT
+    NAT --> External
+
+    EKS --> DD
+    DD --> CW
+
+    style ALB fill:#ff9900
+    style RDS fill:#3b48cc
+    style Redis fill:#dc382d
+    style S3 fill:#569a31
+    style VNPay fill:#0066b2
+```
+
+**Network Security:**
+
+```mermaid
+flowchart LR
+    subgraph SG1["SG: ALB"]
+        ALB[ALB<br/>443 from 0.0.0.0/0]
+    end
+
+    subgraph SG2["SG: EKS Nodes"]
+        EKS[EKS<br/>8080 from ALB SG]
+    end
+
+    subgraph SG3["SG: Database"]
+        RDS[RDS<br/>5432 from EKS SG]
+        Redis[Redis<br/>6379 from EKS SG]
+    end
+
+    ALB -->|HTTPS| EKS
+    EKS -->|TCP 5432| RDS
+    EKS -->|TCP 6379| Redis
+
+    style SG1 fill:#ffcccc
+    style SG2 fill:#ffffcc
+    style SG3 fill:#ccffcc
+```
+
+### 10.9 Architecture Evolution Roadmap
+
+**Phase 1: MVP (Month 1-3)**
+
+```mermaid
+flowchart LR
+    subgraph MVP["MVP Architecture"]
+        FE[React SPA] --> API[Monolithic API<br/>Go]
+        API --> DB[(PostgreSQL)]
+        API --> Cache[(Redis)]
+        API --> Pay[Payment<br/>VNPay/Momo]
+    end
+    style MVP fill:#e6f3ff
+```
+
+**Phase 2: Scale (Month 4-6)**
+
+```mermaid
+flowchart LR
+    subgraph Scale["Scaled Architecture"]
+        FE[React SPA] --> GW[API Gateway]
+        GW --> User[User Svc]
+        GW --> Product[Product Svc]
+        GW --> Order[Order Svc]
+
+        User --> DB[(PostgreSQL)]
+        Product --> DB
+        Product --> Cache[(Redis)]
+        Order --> DB
+        Order --> MQ[RabbitMQ]
+        MQ --> Pay[Payment Svc]
+        MQ --> Notif[Notification]
+    end
+    style Scale fill:#fff3e6
+```
+
+**Phase 3: Enterprise (Month 7-12)**
+
+```mermaid
+flowchart TB
+    subgraph Enterprise["Enterprise Architecture"]
+        subgraph Frontend
+            Web[Web App]
+            Mobile[Mobile App]
+            Admin[Admin Portal]
+        end
+
+        subgraph Gateway
+            Kong[Kong Gateway<br/>Rate Limit, Auth]
+        end
+
+        subgraph Services
+            User[User]
+            Product[Product]
+            Order[Order]
+            Payment[Payment]
+            Inventory[Inventory]
+            Search[Search]
+            Analytics[Analytics]
+        end
+
+        subgraph Data
+            PG[(PostgreSQL)]
+            Redis[(Redis)]
+            ES[(Elasticsearch)]
+            Kafka[Kafka]
+        end
+
+        subgraph ML
+            Recommend[Recommendation<br/>Engine]
+            Fraud[Fraud<br/>Detection]
+        end
+    end
+
+    Frontend --> Kong
+    Kong --> Services
+    Services --> Data
+    Analytics --> ML
+    Search --> ES
+
+    style Enterprise fill:#e6ffe6
+```
+
+**Evolution Decision Points:**
+
+```mermaid
+flowchart TD
+    Start[MVP Live] --> Q1{Traffic > 100 req/s?}
+    Q1 -->|No| Stay1[Stay Monolith]
+    Q1 -->|Yes| Split[Split Services]
+
+    Split --> Q2{Need Search?}
+    Q2 -->|No| Stay2[Keep PostgreSQL]
+    Q2 -->|Yes| ES[Add Elasticsearch]
+
+    ES --> Q3{Need Real-time?}
+    Q3 -->|No| Stay3[Keep REST]
+    Q3 -->|Yes| WS[Add WebSocket]
+
+    WS --> Q4{Need ML?}
+    Q4 -->|No| Done[Scale Horizontally]
+    Q4 -->|Yes| ML[Add ML Pipeline]
+
+    style Start fill:#ccffcc
+    style Split fill:#ffffcc
+    style ES fill:#ffffcc
+    style WS fill:#fff3e6
+    style ML fill:#ffcccc
+```
+
+### 10.10 Team Structure & Responsibilities
+
+```mermaid
+flowchart TB
+    subgraph Leadership
+        SA[Solution Architect]
+        TL[Tech Lead]
+        PO[Product Owner]
+    end
+
+    subgraph TeamA["Team A - Core"]
+        A1[BE Dev 1]
+        A2[BE Dev 2]
+        A3[BE Dev 3]
+    end
+
+    subgraph TeamB["Team B - Payments"]
+        B1[BE Dev 4]
+        B2[BE Dev 5]
+    end
+
+    subgraph TeamFE["Frontend Team"]
+        F1[FE Dev 1]
+        F2[FE Dev 2]
+        F3[FE Dev 3]
+    end
+
+    subgraph Ops["DevOps"]
+        D1[DevOps Engineer]
+    end
+
+    SA -->|Architecture decisions| TL
+    SA -->|NFRs, trade-offs| PO
+    TL -->|Code review| TeamA
+    TL -->|Code review| TeamB
+    TL -->|API contracts| TeamFE
+    D1 -->|Infra support| TeamA
+    D1 -->|Infra support| TeamB
+
+    style SA fill:#ff9999
+    style TL fill:#99ccff
+    style PO fill:#99ff99
+```
+
+**RACI Matrix:**
+
+```mermaid
+flowchart LR
+    subgraph RACI["Responsibility Matrix"]
+        direction TB
+        subgraph Tasks
+            T1[Architecture Design]
+            T2[API Specs]
+            T3[Code Implementation]
+            T4[Code Review]
+            T5[Deployment]
+            T6[Monitoring]
+            T7[Incident Response]
+        end
+    end
+```
+
+| Task | SA | Tech Lead | Dev | DevOps | PO |
+|------|:--:|:---------:|:---:|:------:|:--:|
+| Architecture Design | **R** | C | I | C | A |
+| NFR Definition | **R** | C | I | C | A |
+| API Specs | A | **R** | C | I | I |
+| Code Implementation | I | A | **R** | I | I |
+| Code Review | I | **R** | C | I | I |
+| Deployment | C | C | I | **R** | I |
+| Monitoring Setup | C | C | I | **R** | I |
+| Incident Response | C | **R** | C | C | I |
+| Go/No-Go Decision | **R** | C | I | C | A |
+
+*R=Responsible, A=Accountable, C=Consulted, I=Informed*
+
+### 10.11 Deployment Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Dev["Development"]
+        Code[👨‍💻 Code] --> PR[Pull Request]
+        PR --> Review[Code Review]
+    end
+
+    subgraph CI["CI Pipeline"]
+        Review --> Test[Unit Tests]
+        Test --> Lint[Lint + Security]
+        Lint --> Build[Build Image]
+        Build --> Push[Push to ECR]
+    end
+
+    subgraph CD["CD Pipeline"]
+        Push --> DevEnv[Deploy Dev]
+        DevEnv --> IntTest[Integration Test]
+        IntTest --> Staging[Deploy Staging]
+        Staging --> UAT[UAT Test]
+        UAT --> Approve{Manual Approve?}
+        Approve -->|Yes| Canary[Canary 5%]
+        Approve -->|No| Fix[Fix Issues]
+        Fix --> Code
+        Canary --> Monitor{Metrics OK?}
+        Monitor -->|Yes| Prod25[Prod 25%]
+        Monitor -->|No| Rollback[Rollback]
+        Prod25 --> Prod100[Prod 100%]
+    end
+
+    style Code fill:#e6f3ff
+    style Canary fill:#ffffcc
+    style Prod100 fill:#ccffcc
+    style Rollback fill:#ffcccc
+```
+
+**Pipeline Stages Detail:**
+
+```mermaid
+flowchart TB
+    subgraph Stage1["Stage 1: Build"]
+        S1A[Checkout Code]
+        S1B[Install Deps]
+        S1C[Run Tests]
+        S1D[Build Binary]
+        S1E[Build Docker]
+        S1A --> S1B --> S1C --> S1D --> S1E
+    end
+
+    subgraph Stage2["Stage 2: Security"]
+        S2A[SAST Scan]
+        S2B[Dependency Check]
+        S2C[Container Scan]
+        S2A --> S2B --> S2C
+    end
+
+    subgraph Stage3["Stage 3: Deploy"]
+        S3A[Push Image]
+        S3B[Update K8s]
+        S3C[Health Check]
+        S3D[Smoke Test]
+        S3A --> S3B --> S3C --> S3D
+    end
+
+    Stage1 --> Stage2 --> Stage3
+
+    style Stage1 fill:#e6f3ff
+    style Stage2 fill:#fff3e6
+    style Stage3 fill:#e6ffe6
+```
+
+### 10.12 Cost Breakdown
 
 ```
 AWS (ap-southeast-1):
