@@ -1460,6 +1460,462 @@ flowchart TD
 
 ---
 
+## 10) Case Study: E-Commerce Platform - SA Deep Dive
+
+> Phần này đi sâu vào tư duy SA khi phân tích bài toán E-Commerce. Đây là cách SA thực sự làm việc - không chỉ output mà còn quá trình suy nghĩ.
+
+### 10.1 Buổi họp đầu tiên - SA hỏi gì?
+
+**Bối cảnh:** CEO: "Tao muốn làm e-commerce, 3 tháng launch, $50k/tháng budget."
+
+**SA KHÔNG nói:** "OK, để em design."
+
+**SA HỎI:**
+
+| Câu hỏi | Tại sao hỏi | Ảnh hưởng |
+|---------|-------------|-----------|
+| "Target bao nhiêu users sau 6 tháng?" | Sizing infrastructure | 10k → 1 server, 1M → cluster |
+| "Peak traffic khi nào?" | Capacity planning | Flash sale 10x → auto-scaling |
+| "Bán gì? Vật lý hay digital?" | Inventory, shipping | Vật lý → logistics API |
+| "Thanh toán những gì?" | PCI compliance | Credit card → PCI-DSS |
+| "Data nhạy cảm gì?" | Security architecture | CCCD → encryption bắt buộc |
+| "Team hiện tại biết gì?" | Tech stack | Team biết Go → dùng Go |
+| "Có legacy system nào?" | Migration complexity | Có ERP → adapter layer |
+| "3 tháng là hard hay soft deadline?" | Risk tolerance | Hard → cut features |
+
+**Output sau buổi họp:**
+
+```
+Meeting Notes - E-Commerce Kickoff
+Date: 2024-01-15
+
+KEY DECISIONS:
+- Target: 100k users, 10k orders/ngày
+- Payment: VNPay, Momo, COD (NO credit card)
+- Timeline: HARD deadline - investor demo 15/4
+- Budget: $50k infra, $10k tools
+
+RISKS:
+1. 3 tháng tight cho MVP
+2. Team chưa làm payment integration
+3. Logistics partner chưa chốt
+
+ACTIONS:
+- SA: Draft architecture by EOW
+- PO: Finalize features by Wed
+- CTO: Confirm logistics by Fri
+```
+
+### 10.2 Risk Analysis
+
+**SA làm Risk Matrix TRƯỚC khi design:**
+
+| Rủi ro | Xác suất | Ảnh hưởng | Điểm | Giảm thiểu |
+|--------|----------|-----------|------|------------|
+| Payment integration fail | Cao | Critical | 🔴 | POC tuần 1, fallback COD |
+| Không kịp deadline | TB | Critical | 🔴 | Cut features, parallel work |
+| Performance không đạt | TB | High | 🟠 | Load test sớm, cache |
+| Security breach | Thấp | Critical | 🟠 | Pentest, security review |
+| Logistics API unstable | Cao | Medium | 🟡 | Circuit breaker, manual fallback |
+
+**Risk Response:**
+
+```
+CRITICAL RISKS (🔴):
+
+1. Payment Integration Fail
+   - Week 1: POC VNPay sandbox
+   - Week 2: Fail → switch Momo
+   - Fallback: Launch COD only
+   - Owner: Team B + SA review
+
+2. Không kịp deadline
+   - MVP: Browse, Cart, Checkout, Order tracking
+   - CUT: Advanced search, Wishlist, Reviews
+   - Weekly checkpoint với CEO
+```
+
+### 10.3 Capacity Planning
+
+**SA tính từ business → technical specs:**
+
+```
+INPUT:
+- 10,000 orders/ngày
+- 100,000 users sau 6 tháng
+- Peak: Flash sale 10x
+- Page load < 3s
+
+CALCULATIONS:
+
+1. REQUESTS PER SECOND
+   - 10,000 orders/ngày ÷ 86,400 = 0.12 orders/sec
+   - 80% orders trong 8h (10AM-6PM)
+   - → 8,000 ÷ 28,800 = 0.28 orders/sec peak
+   - Mỗi order = ~20 API calls
+   - → 0.28 × 20 = 5.6 req/sec orders
+   - Browse traffic = 10x orders
+   - → ~60 req/sec normal, 600 req/sec flash sale
+
+2. DATABASE SIZING
+   - Orders: 10k/ngày × 365 = 3.65M rows/năm
+   - Order items: 3 items/order = 11M rows/năm
+   - Total: ~15M rows/năm = ~5GB/năm
+   - → RDS db.t3.medium đủ năm đầu
+
+3. INSTANCE SIZING
+   - 600 req/sec peak
+   - Go: ~1000 req/sec per core với DB
+   - → 2× t3.small với auto-scaling to 4
+
+4. CACHE SIZING
+   - Products: 10,000 × 2KB = 20MB
+   - Sessions: 10,000 × 1KB = 10MB
+   - → Redis t3.small
+```
+
+**Capacity Summary:**
+
+| Component | Size | Cost/month | Scale Trigger |
+|-----------|------|------------|---------------|
+| EKS Cluster | 2 nodes t3.medium | $140 | CPU > 70% |
+| RDS PostgreSQL | db.t3.medium Multi-AZ | $130 | Connections > 80% |
+| ElastiCache Redis | cache.t3.small | $25 | Memory > 70% |
+| ALB | 1 | $20 | - |
+| S3 + CloudFront | 100GB | $30 | - |
+| NAT Gateway | 1 | $45 | - |
+| **Total** | | **~$390** | |
+
+### 10.4 Failure Mode Analysis
+
+**SA map MỌI cách system có thể chết:**
+
+```mermaid
+flowchart TD
+    subgraph UserFlow["User mua hàng"]
+        Browse[Browse] --> Cart[Add Cart]
+        Cart --> Checkout[Checkout]
+        Checkout --> Pay[Payment]
+        Pay --> Confirm[Confirmed]
+    end
+
+    Browse -.->|Fail| F1[Product Svc down]
+    Cart -.->|Fail| F2[Redis down]
+    Checkout -.->|Fail| F3[Order Svc down]
+    Pay -.->|Fail| F4[VNPay timeout]
+
+    F1 -.-> M1[Show cached products]
+    F2 -.-> M2[DB cart, slower]
+    F3 -.-> M3[Retry + error msg]
+    F4 -.-> M4[Retry 3x, COD option]
+
+    style F1 fill:#ffcccc
+    style F2 fill:#ffcccc
+    style F3 fill:#ffcccc
+    style F4 fill:#ffcccc
+```
+
+**Failure Mode Table:**
+
+| Component | Failure | User thấy | Mitigation | RTO |
+|-----------|---------|-----------|------------|-----|
+| Product Service | Crash | Trang trắng | Cache, restart | 30s |
+| | Slow >2s | Loading lâu | Timeout, cached | 2s |
+| Redis | Down | Cart mất | Persist DB | 1min |
+| Order Service | Crash | Checkout fail | Retry, error | 30s |
+| | Duplicate | 2 đơn | Idempotency key | - |
+| VNPay | Timeout | Chờ lâu | 30s timeout, retry | 30s |
+| | Callback fail | Đã trừ tiền, pending | Reconciliation job | 5min |
+| Database | Primary down | Write fail | Failover standby | 1min |
+
+**Critical Path:**
+
+```
+CRITICAL (không fallback, phải hoạt động):
+Order Service → Payment → Database write
+- Fail = User không mua được = mất tiền
+- SLA: 99.9% = 8.7h downtime/năm max
+
+NON-CRITICAL (có fallback):
+- Notification → Order vẫn OK
+- Analytics → Mất data, user không ảnh hưởng
+- Search → Fallback category browse
+```
+
+### 10.5 Data Flow - Checkout
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant OS as Order Service
+    participant PS as Product Service
+    participant DB as PostgreSQL
+    participant PAY as VNPay
+
+    U->>FE: Click "Thanh toán"
+    FE->>OS: POST /orders (JWT)
+    OS->>PS: Check inventory
+    PS->>DB: SELECT stock
+    DB-->>PS: stock = 5
+    PS-->>OS: Available: true
+
+    OS->>DB: BEGIN TRANSACTION
+    OS->>DB: INSERT order
+    OS->>DB: UPDATE stock
+    OS->>DB: COMMIT
+
+    OS-->>FE: 201 {order_id, payment_url}
+    FE->>U: Redirect VNPay
+
+    Note over U,PAY: User pays
+
+    PAY->>OS: Callback success
+    OS->>DB: UPDATE status=paid
+```
+
+**Transaction Boundaries:**
+
+```sql
+-- Order creation (MUST be atomic)
+BEGIN;
+  INSERT INTO orders (id, user_id, status, total)
+    VALUES ($1, $2, 'pending', $3);
+
+  INSERT INTO order_items (order_id, product_id, qty, price)
+    SELECT $1, product_id, quantity, price
+    FROM cart_items WHERE user_id = $2;
+
+  UPDATE products SET stock = stock - oi.quantity
+    FROM order_items oi
+    WHERE products.id = oi.product_id;
+
+  DELETE FROM cart_items WHERE user_id = $2;
+COMMIT;
+-- Fail any step → ROLLBACK all
+```
+
+### 10.6 Integration Points
+
+| Integration | Type | Timeout | Retry | Circuit Breaker | Fallback |
+|-------------|------|---------|-------|-----------------|----------|
+| VNPay | External | 30s | 3x exp | Yes, 5 fails | COD option |
+| Momo | External | 30s | 3x exp | Yes, 5 fails | VNPay/COD |
+| GHN Shipping | External | 10s | 2x | Yes, 3 fails | Manual |
+| SendGrid | External | 5s | 5x async | Yes, 10 fails | Queue later |
+| Internal | Internal | 2s | 2x | Yes, 5 fails | Error |
+
+### 10.7 Weekly Checklist (12 tuần)
+
+**Week 1-2: Foundation**
+- [ ] Finalize NFRs
+- [ ] Setup AWS, VPC
+- [ ] POC VNPay
+- [ ] Context + Component diagrams
+- [ ] Database schema v1
+
+**Week 3-4: Core Services**
+- [ ] User Service MVP
+- [ ] Product Service MVP
+- [ ] Order Service MVP
+- [ ] OpenAPI specs
+- [ ] FE-BE integration start
+
+**Week 5-6: Integrations**
+- [ ] VNPay complete
+- [ ] Momo integration
+- [ ] GHN shipping
+- [ ] Notification service
+
+**Week 7-8: Hardening**
+- [ ] Load test (600 req/s)
+- [ ] Security review
+- [ ] Monitoring dashboards
+- [ ] Alert rules
+
+**Week 9-10: Staging**
+- [ ] Full staging deploy
+- [ ] UAT với PO
+- [ ] Bug fixes
+- [ ] Runbooks
+
+**Week 11-12: Launch**
+- [ ] Production deploy
+- [ ] Canary rollout
+- [ ] Go/No-Go
+- [ ] 24h monitoring
+
+### 10.8 Cost Breakdown
+
+```
+AWS (ap-southeast-1):
+├── Compute
+│   ├── EKS: $73/month
+│   ├── EC2 t3.medium ×2: $67/month
+│   └── NAT Gateway: $45/month
+├── Database
+│   ├── RDS Multi-AZ: $130/month
+│   └── Redis: $25/month
+├── Storage
+│   ├── S3 100GB: $2/month
+│   ├── EBS: $10/month
+│   └── CloudFront: $50/month
+├── Networking
+│   └── ALB: $20/month
+└── Monitoring: $10/month
+
+TOTAL AWS: ~$435/month
+
+OTHER:
+├── Datadog: $500/month
+├── GitHub Team: $44/month
+├── SendGrid: $15/month
+└── Slack: $75/month
+
+TOTAL OTHER: ~$635/month
+
+GRAND TOTAL: ~$1,070/month
+
+COST PER ORDER (10k/ngày):
+= $1,070 ÷ 300,000 = $0.0036/order ✅
+```
+
+**Scaling Projection:**
+
+| Stage | Orders/day | Cost | Per Order |
+|-------|------------|------|-----------|
+| MVP | 1,000 | $600 | $0.02 |
+| 3 months | 10,000 | $1,100 | $0.004 |
+| 6 months | 30,000 | $2,500 | $0.003 |
+| 12 months | 100,000 | $6,000 | $0.002 |
+
+### 10.9 Production Readiness Checklist
+
+**Infrastructure:**
+- [ ] Multi-AZ configured
+- [ ] Auto-scaling (CPU > 70%)
+- [ ] Backups verified
+- [ ] SSL certificates
+- [ ] DNS health checks
+
+**Security:**
+- [ ] Secrets in Secrets Manager
+- [ ] Rate limiting (100 req/min/user)
+- [ ] WAF configured
+- [ ] Security groups minimal
+- [ ] Penetration test done
+
+**Observability:**
+- [ ] Structured logs
+- [ ] Trace ID propagation
+- [ ] Dashboard: RPS, Error, P99
+- [ ] Alerts configured
+- [ ] On-call rotation
+- [ ] Runbooks ready
+
+**Reliability:**
+- [ ] Health checks
+- [ ] Circuit breakers
+- [ ] Retry policies
+- [ ] Timeouts set
+- [ ] Graceful shutdown
+- [ ] Connection pooling
+
+**Performance:**
+- [ ] Load test passed (600 req/s)
+- [ ] No N+1 queries
+- [ ] Caching works
+- [ ] CDN for assets
+- [ ] Gzip enabled
+
+### 10.10 Post-Launch
+
+**Day 1-7: Hypercare**
+
+| Ngày | Focus |
+|------|-------|
+| 1 | Monitor 24/7, war room |
+| 2 | Review overnight, fix issues |
+| 3-5 | Daily standup, feedback |
+| 6-7 | Document lessons, relax alerts |
+
+**Ongoing:**
+
+| Task | Frequency |
+|------|-----------|
+| Dashboard review | Daily |
+| Cost optimization | Weekly |
+| Security scan | Weekly |
+| Architecture review | Bi-weekly |
+| Capacity planning | Monthly |
+| DR drill | Quarterly |
+
+---
+
+## 11) SA Templates
+
+### 11.1 Architecture Review Checklist
+
+```markdown
+## Functionality
+- [ ] Solves business problem?
+- [ ] Edge cases handled?
+
+## Reliability
+- [ ] Failure modes considered?
+- [ ] Retry/timeout/circuit breaker?
+- [ ] Data consistency?
+
+## Performance
+- [ ] N+1 queries?
+- [ ] Need cache?
+- [ ] Async where possible?
+
+## Security
+- [ ] Input validation?
+- [ ] Auth/authz correct?
+- [ ] Sensitive data protected?
+
+## Operability
+- [ ] Logs have context?
+- [ ] Metrics exposed?
+- [ ] Config externalized?
+```
+
+### 11.2 Incident Response Checklist
+
+```markdown
+## Severity
+- [ ] Sev1: System down, all users
+- [ ] Sev2: Major feature broken
+- [ ] Sev3: Minor issue
+
+## First 5 minutes
+- [ ] Acknowledge alert
+- [ ] Recent deploy? → ROLLBACK
+- [ ] No → Continue investigation
+
+## Investigation (5-30 min)
+- [ ] Check error logs
+- [ ] Check metrics
+- [ ] Check dependencies
+- [ ] Identify component
+
+## Resolution
+- [ ] Fix or workaround
+- [ ] Verify in production
+- [ ] Monitor 15 minutes
+- [ ] Close incident
+
+## Post-Incident
+- [ ] Write timeline
+- [ ] Schedule post-mortem
+- [ ] Create action items
+- [ ] Update runbooks
+```
+
+---
+
 **Tài liệu tham khảo:**
 - [AWS ADR Best Practices](https://aws.amazon.com/blogs/architecture/master-architecture-decision-records-adrs-best-practices-for-effective-decision-making/)
 - [Google Cloud ADR Guide](https://cloud.google.com/architecture/architecture-decision-records)
