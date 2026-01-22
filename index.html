@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sổ tay Solution Architect</title>
+  <meta name="description" content="Tài liệu cho dev muốn hiểu SA làm gì, hoặc dev đang chuyển sang làm SA.">
+
+  <!-- Google Fonts: Lexend Deca & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --base-font-family: 'Lexend Deca', sans-serif;
+      --code-font-family: 'JetBrains Mono', monospace;
+      --theme-color: #3F51B5;
+    }
+
+    * {
+      font-family: var(--base-font-family) !important;
+    }
+
+    body {
+      font-family: var(--base-font-family) !important;
+    }
+
+    code, pre, .token {
+      font-family: var(--code-font-family) !important;
+    }
+
+    .markdown-section code,
+    .markdown-section pre,
+    .markdown-section pre code {
+      font-family: var(--code-font-family) !important;
+    }
+
+    /* Hide sidebar */
+    .sidebar {
+      display: none !important;
+    }
+
+    .content {
+      left: 0 !important;
+      padding-left: 40px !important;
+    }
+
+    /* Custom table styling */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f5f5f5;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">Loading...</div>
+
+  <script>
+    window.$docsify = {
+      name: 'Sổ tay Solution Architect',
+      repo: '',
+      loadSidebar: false,
+      loadNavbar: false,
+      homepage: 'So_tay_SA_VN.md',
+      auto2top: true,
+      maxLevel: 4,
+      subMaxLevel: 2,
+      coverpage: false,
+      onlyCover: false,
+      notFoundPage: true
+    }
+  </script>
+
+  <!-- Docsify core -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+
+  <!-- Syntax highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-go.min.js"></script>
+
+  <!-- Mermaid diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  </script>
+</body>
+</html>
