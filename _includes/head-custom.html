@@ -90,3 +90,60 @@
     display: none !important;
   }
 </style>
+
+<script>
+  // Aggressively hide sidebar and navigation on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    // Hide sidebar
+    const sidebar = document.querySelector('#sidebar, aside.sidebar, .sidebar, aside#sidebar');
+    if (sidebar) {
+      sidebar.style.display = 'none';
+      sidebar.style.visibility = 'hidden';
+      sidebar.style.width = '0';
+      sidebar.style.padding = '0';
+      sidebar.style.margin = '0';
+    }
+    
+    // Hide all navigation elements
+    const navs = document.querySelectorAll('nav, .nav-tabs, .tabs, .site-nav, .navigation, .menu');
+    navs.forEach(nav => {
+      nav.style.display = 'none';
+      nav.style.visibility = 'hidden';
+    });
+    
+    // Hide links containing Vietnamese menu text
+    const links = document.querySelectorAll('a');
+    links.forEach(link => {
+      const text = link.textContent.trim().toUpperCase();
+      const href = link.getAttribute('href') || '';
+      if (text.includes('TRANG CHỦ') || 
+          text.includes('GIỚI THIỆU') || 
+          text.includes('SỐ TAY') ||
+          href.includes('trang-chu') ||
+          href.includes('gioi-thieu') ||
+          href === '/' ||
+          href === '/home/' ||
+          href === '/about/') {
+        link.style.display = 'none';
+        link.parentElement && (link.parentElement.style.display = 'none');
+      }
+    });
+    
+    // Adjust main content width
+    const main = document.querySelector('main, .main-content, #main-wrapper, .content-wrapper');
+    if (main) {
+      main.style.marginLeft = '0';
+      main.style.width = '100%';
+      main.style.maxWidth = '100%';
+    }
+  });
+  
+  // Also run after a short delay to catch dynamically loaded content
+  setTimeout(function() {
+    const sidebar = document.querySelector('#sidebar, aside.sidebar, .sidebar');
+    if (sidebar) sidebar.style.display = 'none';
+    
+    const navs = document.querySelectorAll('nav, .nav-tabs, .tabs');
+    navs.forEach(nav => nav.style.display = 'none');
+  }, 100);
+</script>
