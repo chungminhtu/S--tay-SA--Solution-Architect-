@@ -1,23 +1,40 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
   :root {
     --main-font: 'Lexend Deca', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --mono-font: 'Roboto Mono', 'Courier New', monospace;
+    --mono-font: 'Google Sans Code', 'Courier New', monospace;
   }
   
-  body {
+  /* Apply Lexend Deca to ALL text elements - comprehensive */
+  * {
     font-family: var(--main-font) !important;
   }
   
-  code, pre, kbd, samp {
-    font-family: var(--mono-font) !important;
+  /* Specific overrides for all text elements */
+  body, html,
+  p, div, span, a, li, ul, ol,
+  h1, h2, h3, h4, h5, h6,
+  blockquote, cite, em, strong, b, i, u,
+  table, th, td, tr, thead, tbody,
+  label, input, textarea, select, button,
+  .content, .post-content, .main-content,
+  article, section, aside, header, footer,
+  .title, .subtitle, .heading {
+    font-family: 'Lexend Deca', sans-serif !important;
   }
   
-  .highlight pre {
-    font-family: var(--mono-font) !important;
+  /* Apply Google Sans Code for ALL code/monospace elements */
+  code, pre, kbd, samp,
+  .highlight, .highlight pre, .highlight code,
+  .language-*, .md-code,
+  pre code, code[class*="language-"],
+  .code, .code-block, .codeblock,
+  .hljs, .hljs code {
+    font-family: 'Google Sans Code', monospace !important;
   }
   
   /* Hide ALL navigation tabs and menu items */
