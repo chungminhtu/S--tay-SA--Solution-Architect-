@@ -1,0 +1,9 @@
+{
+  "name": "so-tay-solution-architect",
+  "version": "1.0.0",
+  "description": "Sổ tay Solution Architect",
+  "scripts": {
+    "build": "node build-static.js",
+    "deploy": "node build-static.js && git add -A && git commit -m 'Deploy update' && git push"
+  }
+}

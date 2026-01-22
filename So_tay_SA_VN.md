@@ -423,6 +423,14 @@ resource "aws_budgets_budget" "monthly" {
 
 **Tại sao quan trọng:** Không có scope rõ thì team sẽ build sai thứ hoặc build quá nhiều.
 
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Build sai feature | Team làm multi-language trong khi MVP chỉ cần tiếng Việt → delay 2 tuần |
+| Scope creep | Stakeholder thêm feature liên tục → không bao giờ release |
+| Resource waste | 3 dev làm feature không ai dùng → burn rate tăng vô nghĩa |
+| Conflict giữa teams | BE nghĩ scope A, FE nghĩ scope B → integration fail |
+| Không đo được success | Không biết "xong" là gì → project kéo dài vô tận |
+
 **Tài liệu Scope:**
 
 | Mục | Nội dung |
@@ -451,6 +459,14 @@ resource "aws_budgets_budget" "monthly" {
 ### Bước 2 — Define NFRs (Yêu cầu phi chức năng) với số cụ thể
 
 **Tại sao quan trọng:** Không có số thì không biết design đủ hay chưa.
+
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Over-engineering | Design cho 1M users trong khi chỉ có 1K → tốn tiền, phức tạp vô ích |
+| Under-engineering | Design cho 1K users nhưng launch có 100K → system crash ngày đầu |
+| Không thể test | "Phải nhanh" - nhanh là bao nhiêu? 100ms hay 1s? |
+| Blame game | Production chậm → dev đổ lỗi infra, infra đổ lỗi dev |
+| Không thể optimize | Không biết baseline → không biết cải thiện được bao nhiêu |
 
 **Non-Functional Requirements (Yêu cầu phi chức năng) Specification cho E-Commerce:**
 
@@ -499,6 +515,14 @@ resource "aws_budgets_budget" "monthly" {
 
 **Tại sao quan trọng:** Hiểu boundary của system và integration points.
 
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Integration surprise | Dev không biết phải call external API → release delay khi phát hiện |
+| Security blind spot | Không biết data flow ra ngoài ở đâu → GDPR violation |
+| Dependency risk | Không biết phụ thuộc payment provider nào → provider down, không có backup |
+| Cost surprise | Không tính external API calls → bill tháng đầu gấp 10x dự kiến |
+| Ownership unclear | Bug ở boundary → team A đổ team B, không ai fix |
+
 **Ví dụ:**
 
 ```mermaid
@@ -535,6 +559,14 @@ flowchart TB
 ### Bước 4 — Vẽ Component Diagram
 
 **Tại sao quan trọng:** Define service boundaries và ownership.
+
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Distributed monolith | Services coupled chặt → deploy 1 cái phải deploy tất cả |
+| Team conflict | 2 teams cùng sửa 1 service → merge conflict, block nhau |
+| Circular dependency | Service A call B, B call C, C call A → debug nightmare |
+| Data duplication | Không rõ service nào own data → 3 services cùng store user info |
+| Scaling bottleneck | Không tách được service hot → phải scale cả monolith |
 
 **Ví dụ:**
 
@@ -592,6 +624,14 @@ flowchart TB
 ### Bước 5 — Compare Architecture Options
 
 **Tại sao quan trọng:** Justify why this architecture, not another.
+
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| HiPPO decision | Highest Paid Person's Opinion wins → chọn tech trendy thay vì phù hợp |
+| Regret later | 6 tháng sau: "sao không dùng X?" → không có evidence để defend |
+| Same mistake twice | Không document tại sao reject option B → team mới propose lại B |
+| Stakeholder distrust | CTO hỏi "tại sao Kafka?" → không trả lời được → mất credibility |
+| Costly migration | Chọn sai từ đầu vì không compare → phải rewrite sau 1 năm |
 
 **Ví dụ Decision Matrix:**
 
@@ -663,6 +703,14 @@ flowchart LR
 
 **Tại sao quan trọng:** 6 tháng sau không ai nhớ tại sao chọn PostgreSQL.
 
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Repeat mistakes | Team mới không biết context → propose lại solution đã reject |
+| Onboarding chậm | Dev mới hỏi "tại sao?" → không ai nhớ → mất 2 tuần tìm hiểu |
+| Revert tốt thành xấu | Ai đó "optimize" code mà không biết lý do ban đầu → break system |
+| Audit fail | Auditor hỏi "tại sao design này?" → không có evidence |
+| Technical debt tích lũy | Không ai dám đổi vì không biết impact → code rot |
+
 **Architecture Decision Record (Bản ghi quyết định kiến trúc) Template (dùng cho E-Commerce project):**
 
 | Mục | Nội dung |
@@ -699,6 +747,14 @@ flowchart LR
 ### Bước 7 — Thiết kế Application Programming Interface
 
 **Tại sao quan trọng:** FE và BE code song song mà không conflict.
+
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Integration hell | FE expect field "userName", BE return "user_name" → bug phát hiện muộn |
+| Block nhau | FE chờ BE xong API mới code được → timeline x2 |
+| Breaking changes | BE đổi response format → FE crash production |
+| Documentation drift | Code và doc khác nhau → external partner integrate sai |
+| Testing khó | Không có contract → không mock được → E2E test chậm |
 
 **Application Programming Interface Endpoints:**
 
@@ -758,6 +814,14 @@ flowchart LR
 ### Bước 8 — Design Database Schema
 
 **Tại sao quan trọng:** Schema sai thì migrate đau.
+
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Data migration nightmare | Đổi schema với 100M rows → downtime 8 tiếng |
+| Performance cliff | Thiếu index → query chậm 100x khi data tăng |
+| Data integrity loss | Không có foreign key → orphan records everywhere |
+| Query complexity | Normalize quá mức → JOIN 10 tables cho 1 query |
+| Storage cost explode | Denormalize sai → duplicate data 10x |
 
 **Entity Relationship Diagram (Sơ đồ quan hệ thực thể):**
 
@@ -916,6 +980,14 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **Tại sao quan trọng:** Manual deploy = human error.
 
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| "Works on my machine" | Dev quên commit 1 file → production crash |
+| Deploy sợ hãi | Team sợ deploy Friday → feature delay cả tuần |
+| Rollback chậm | Manual rollback mất 30 phút → downtime kéo dài |
+| Environment drift | Staging khác production → bug chỉ xuất hiện trên prod |
+| Audit fail | Không trace được ai deploy gì khi nào → compliance violation |
+
 **SA quyết định:**
 
 | Quyết định | Lựa chọn | Đánh đổi |
@@ -949,6 +1021,14 @@ ALTER TABLE users DROP COLUMN last_name;
 ### Bước 10 — Design Observability
 
 **Tại sao quan trọng:** Không có observability = debugging mù.
+
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| MTTR cao | Bug report → mất 4 tiếng tìm root cause vì không có logs |
+| Silent failures | Service chết âm thầm → user complain mới biết |
+| Blame game | Không có metrics → teams đổ lỗi nhau |
+| Capacity planning fail | Không biết resource usage → over-provision hoặc crash |
+| Customer trust lost | User thấy lỗi trước team → bad reputation |
 
 **3 trụ cột:**
 
@@ -1040,6 +1120,14 @@ ALTER TABLE users DROP COLUMN last_name;
 
 **Tại sao quan trọng:** 1 breach có thể kill company.
 
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Data breach | Customer PII leaked → phạt GDPR 4% revenue, class action lawsuit |
+| Reputation destroy | News "Company X hacked" → customers leave, stock crash |
+| Ransomware | Hacker encrypt data → trả $1M hoặc mất tất cả |
+| Compliance fail | Không có security audit → mất license, không thể operate |
+| Legal liability | CEO/CTO có thể bị kiện cá nhân vì negligence |
+
 **Danh sách kiểm tra Security:**
 
 | Hạng mục | Kiểm tra |
@@ -1092,6 +1180,14 @@ ALTER TABLE users DROP COLUMN last_name;
 ### Bước 12 — Design Release Strategy
 
 **Tại sao quan trọng:** Bad release = production down.
+
+| Hậu quả khi thiếu | Ví dụ thực tế |
+|-------------------|---------------|
+| Big bang failure | Release tất cả 1 lần → bug affect 100% users |
+| Rollback impossible | Không có strategy → stuck với bad version |
+| Feature conflict | 2 teams release cùng lúc → unexpected interaction |
+| Customer impact | Bug đến tất cả users → support overwhelmed |
+| Revenue loss | E-commerce down 1 tiếng peak time → mất $100K+ |
 
 **Quy trình Canary Deployment:**
 
