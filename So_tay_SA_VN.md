@@ -20,7 +20,7 @@ SA không code, nhưng mọi bug liên quan đến architecture đều là lỗi
 |---|---|---|
 | Quyết định | Hệ thống gồm những gì, deploy ở đâu | Code bên trong mỗi service viết như thế nào |
 | Scope | Cross-team, cross-service | Trong 1 team, 1-2 services |
-| Output | Diagrams, specs, ADRs | Code, PRs, code reviews |
+| Output | Diagrams, specs, Architecture Decision Records (Bản ghi quyết định kiến trúc) | Code, PRs, code reviews |
 | Fail khi | Production chết vì architecture | Sprint delay vì code quality |
 
 ---
@@ -47,8 +47,8 @@ Mỗi quyết định của SA đều phải cân nhắc 6 góc:
 
 **Kiểm tra:**
 - [ ] Secrets có trong env var plain text không? → Phải dùng Vault/Secrets Manager
-- [ ] API có auth không? Token có expire không?
-- [ ] Data nhạy cảm (PII, payment) có encrypt không?
+- [ ] Application Programming Interface (Giao diện lập trình ứng dụng) có auth không? Token có expire không?
+- [ ] Data nhạy cảm (Personally Identifiable Information - Thông tin nhận dạng cá nhân, payment) có encrypt không?
 - [ ] Có audit log ai làm gì không?
 
 **Chuyện thật:** Một team commit `.env` file vào git, bị bot scan GitHub và hack AWS account trong 15 phút, bill $50k.
@@ -114,29 +114,29 @@ WHERE o.user_id = 1;
 **Câu hỏi:** "Khi traffic tăng 10x, bill tăng bao nhiêu?"
 
 **Bẫy chi phí:**
-- NAT Gateway: $0.045/GB data processed → traffic nội bộ nhiều thì tốn
-- Data transfer cross-AZ: $0.01/GB
-- RDS Multi-AZ: x2 cost
-- Lambda: rẻ khi traffic thấp, đắt khi traffic cao liên tục
+- Network Address Translation Gateway (Cổng dịch NAT): $0.045/GB data processed → traffic nội bộ nhiều thì tốn
+- Data transfer cross-Availability Zone (Vùng khả dụng): $0.01/GB
+- Relational Database Service (Dịch vụ cơ sở dữ liệu quan hệ) Multi-Availability Zone: x2 cost
+- AWS Lambda (Dịch vụ tính toán không máy chủ): rẻ khi traffic thấp, đắt khi traffic cao liên tục
 
 **Ví dụ tính cost:**
 
 ```
 Scenario: 1M requests/day, mỗi request 100KB response
 
-Phương án A: EC2 t3.medium
+Phương án A: Elastic Compute Cloud (Điện toán đám mây đàn hồi) t3.medium
 - Instance: $30/month
-- ALB: $20/month
+- Application Load Balancer (Cân bằng tải ứng dụng): $20/month
 - Total: ~$50/month
 
-Phương án B: Lambda + API Gateway
-- Lambda: 1M * $0.0000002 = $0.2/month
-- API Gateway: 1M * $3.5/million = $3.5/month
+Phương án B: AWS Lambda + Application Programming Interface Gateway (Cổng giao diện lập trình ứng dụng)
+- AWS Lambda: 1M * $0.0000002 = $0.2/month
+- Application Programming Interface Gateway: 1M * $3.5/million = $3.5/month
 - Data transfer: 100GB * $0.09 = $9/month
 - Total: ~$13/month
 
-→ Lambda rẻ hơn cho traffic này
-→ Nhưng nếu 100M requests/day, Lambda = $1300/month, EC2 vẫn ~$50
+→ AWS Lambda rẻ hơn cho traffic này
+→ Nhưng nếu 100M requests/day, AWS Lambda = $1300/month, Elastic Compute Cloud vẫn ~$50
 ```
 
 ### 2.6 Sustainability (Bền vững)
@@ -157,10 +157,10 @@ Phương án B: Lambda + API Gateway
 | Quyết định | Ví dụ |
 |------------|-------|
 | Service boundaries | "Order Service và Payment Service tách riêng" |
-| Communication patterns | "Dùng REST cho sync, Kafka cho async" |
-| Data storage | "PostgreSQL cho transactional, Redis cho cache, S3 cho files" |
-| Deployment topology | "3 AZs, 2 replicas mỗi service" |
-| Security boundaries | "Payment service trong private subnet, chỉ internal ALB access" |
+| Communication patterns | "Dùng REST cho sync, Apache Kafka cho async" |
+| Data storage | "PostgreSQL cho transactional, Redis cho cache, Simple Storage Service (Dịch vụ lưu trữ đơn giản) cho files" |
+| Deployment topology | "3 Availability Zones (Vùng khả dụng), 2 replicas mỗi service" |
+| Security boundaries | "Payment service trong private subnet, chỉ internal Application Load Balancer access" |
 
 ### 3.2 Tech Lead quyết định gì
 
@@ -200,7 +200,7 @@ Tech Lead phải gánh thêm:
 | Team management | ✅ | Cross-team coordination |
 | Sprint planning | ✅ | Roadmap planning |
 | Debugging | ✅ | Tìm nguyên nhân ở system level |
-| API design | ✅ | Integration patterns |
+| Application Programming Interface design | ✅ | Integration patterns |
 | Database schema | ✅ | Data architecture |
 | Local testing | ✅ | Production testing |
 
@@ -208,7 +208,7 @@ Tech Lead phải gánh thêm:
 
 | Tuần | Trọng tâm | Sản phẩm |
 |------|-------|-------------|
-| 1-2 | NFRs | Viết NFR spec cho project hiện tại |
+| 1-2 | Non-Functional Requirements (Yêu cầu phi chức năng) | Viết Non-Functional Requirements spec cho project hiện tại |
 | 3-4 | Diagrams | Vẽ Context + Component diagram |
 | 5-6 | ADRs | Viết 3 ADRs cho decisions gần đây |
 | 7-8 | Observability | Setup dashboard + alerts |
@@ -242,7 +242,7 @@ Tech Lead phải gánh thêm:
 
 **Triệu chứng:** FE và BE code xong, tích hợp thì không chạy.
 
-**Nguyên nhân:** Không có API spec rõ ràng trước khi code.
+**Nguyên nhân:** Không có Application Programming Interface spec rõ ràng trước khi code.
 
 **Giải pháp:**
 1. Viết OpenAPI spec trước
@@ -439,10 +439,10 @@ resource "aws_budgets_budget" "monthly" {
 | Budget | $50k/tháng infra | Runway 18 tháng |
 | Tech | Phải dùng AWS | Hợp đồng có sẵn |
 | Tech | Phải dùng Go | Team quen |
-| Compliance | PCI-DSS | Payment processing |
+| Compliance | Payment Card Industry Data Security Standard (Tiêu chuẩn bảo mật dữ liệu ngành thẻ thanh toán) | Payment processing |
 | Team | 5 BE, 3 FE, 1 DevOps | Headcount hiện tại |
 
-**Ngoài phạm vi (MVP):** Multi-language, Mobile app (web responsive only), Marketplace (only own products)
+**Ngoài phạm vi (Minimum Viable Product - Sản phẩm khả thi tối thiểu):** Multi-language, Mobile app (web responsive only), Marketplace (only own products)
 
 **Xong khi:** PO sign-off
 
@@ -452,14 +452,14 @@ resource "aws_budgets_budget" "monthly" {
 
 **Tại sao quan trọng:** Không có số thì không biết design đủ hay chưa.
 
-**NFR Specification cho E-Commerce:**
+**Non-Functional Requirements (Yêu cầu phi chức năng) Specification cho E-Commerce:**
 
 **Performance:**
 
 | Chỉ số | Mục tiêu | Cách đo |
 |--------|--------|-------------|
-| API Latency P50 | < 100ms | Datadog APM |
-| API Latency P99 | < 500ms | Datadog APM |
+| Application Programming Interface Latency P50 | < 100ms | Datadog Application Performance Monitoring |
+| Application Programming Interface Latency P99 | < 500ms | Datadog Application Performance Monitoring |
 | Page Load Time | < 3s | Lighthouse |
 | Throughput | 500 req/s | Load test |
 
@@ -468,8 +468,8 @@ resource "aws_budgets_budget" "monthly" {
 | Chỉ số | Mục tiêu | Cách đo |
 |--------|--------|-------------|
 | Availability | 99.9% | Uptime monitor |
-| RTO (Recovery Time) | 1 giờ | DR drill |
-| RPO (Recovery Point) | 5 phút | Backup test |
+| Recovery Time Objective (Mục tiêu thời gian phục hồi) | 1 giờ | Disaster Recovery drill |
+| Recovery Point Objective (Mục tiêu điểm phục hồi) | 5 phút | Backup test |
 | Error Rate | < 0.1% | Error tracking |
 
 **Scalability:**
@@ -484,8 +484,8 @@ resource "aws_budgets_budget" "monthly" {
 
 | Yêu cầu | Cách triển khai |
 |-------------|----------------|
-| Authentication | JWT + refresh token |
-| Authorization | RBAC |
+| Authentication | JSON Web Token (Token web JSON) + refresh token |
+| Authorization | Role-Based Access Control (Kiểm soát truy cập dựa trên vai trò) |
 | Encryption | TLS 1.3, AES-256 at rest |
 | Secrets | AWS Secrets Manager |
 
@@ -509,7 +509,7 @@ flowchart TB
         Admin[Admin Panel]
         CMS[CMS]
 
-        Web --> Gateway[API Gateway]
+        Web --> Gateway[Application Programming Interface Gateway]
         Mobile --> Gateway
         Admin --> Gateway
         CMS --> Gateway
@@ -541,7 +541,7 @@ flowchart TB
 ```mermaid
 flowchart TB
     subgraph System["E-Commerce System"]
-        subgraph Gateway["API Gateway (Kong)<br/>Rate Limit, Auth, Routing"]
+        subgraph Gateway["Application Programming Interface Gateway (Kong)<br/>Rate Limit, Auth, Routing"]
         end
 
         Gateway --> UserSvc["User Service<br/>(Team A, Go)<br/>Registration, Auth, Profile"]
@@ -550,7 +550,7 @@ flowchart TB
 
         ProductSvc --> Redis[(Redis Cache)]
 
-        UserSvc --> DB[(PostgreSQL RDS<br/>Primary + Read Replica)]
+        UserSvc --> DB[(PostgreSQL Relational Database Service<br/>Primary + Read Replica)]
         ProductSvc --> DB
         OrderSvc --> DB
 
@@ -577,7 +577,7 @@ flowchart TB
 
 | Service | Team | Công nghệ | Repo | On-call |
 |---------|------|------|------|---------|
-| API Gateway | DevOps | Kong | infra/kong | devops-oncall |
+| Application Programming Interface Gateway | DevOps | Kong | infra/kong | devops-oncall |
 | User Service | Team A | Go | services/user | team-a-oncall |
 | Product Service | Team A | Go | services/product | team-a-oncall |
 | Order Service | Team B | Go | services/order | team-b-oncall |
@@ -598,7 +598,7 @@ flowchart TB
 **Bối cảnh:**
 Cần chọn architecture cho e-commerce platform mới.
 Team: 5 BE devs, kinh nghiệm microservices.
-Timeline: MVP 3 tháng.
+Timeline: Minimum Viable Product (Sản phẩm khả thi tối thiểu) 3 tháng.
 
 **Phương án A: Modular Monolith**
 
@@ -623,10 +623,10 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    APIGW[API Gateway] --> Lambda[Lambda Functions]
+    APIGW[Application Programming Interface Gateway] --> Lambda[AWS Lambda Functions]
     Lambda --> DynamoDB[(DynamoDB)]
-    Lambda --> SQS[SQS Queue]
-    SQS --> Lambda2[Lambda Workers]
+    Lambda --> Simple Queue Service[Simple Queue Service Queue]
+    Simple Queue Service --> Lambda2[Lambda Workers]
     Lambda2 --> External[External APIs]
     style APIGW fill:#ff9900
     style Lambda fill:#ff9900
@@ -637,7 +637,7 @@ flowchart LR
 
 | Tiêu chí | Trọng số | Monolith | Microservices | Serverless |
 |----------|--------|----------|---------------|------------|
-| Time to MVP | 25% | 9 | 6 | 7 |
+| Time to Minimum Viable Product | 25% | 9 | 6 | 7 |
 | Scalability | 20% | 5 | 9 | 9 |
 | Team quen thuộc | 20% | 7 | 9 | 5 |
 | Độ phức tạp vận hành | 15% | 9 | 5 | 7 |
@@ -647,7 +647,7 @@ flowchart LR
 
 **Quyết định:** Chọn **Microservices** vì:
 1. Team đã có kinh nghiệm microservices
-2. Payment service cần isolate vì PCI-DSS
+2. Payment service cần isolate vì Payment Card Industry Data Security Standard (Tiêu chuẩn bảo mật dữ liệu ngành thẻ thanh toán)
 3. Expect scale khác nhau (Product reads >> Order writes)
 
 **Hậu quả:**
@@ -663,17 +663,17 @@ flowchart LR
 
 **Tại sao quan trọng:** 6 tháng sau không ai nhớ tại sao chọn PostgreSQL.
 
-**ADR Template (dùng cho E-Commerce project):**
+**Architecture Decision Record (Bản ghi quyết định kiến trúc) Template (dùng cho E-Commerce project):**
 
 | Mục | Nội dung |
 |---------|---------|
-| **Tiêu đề** | ADR-001: Use PostgreSQL as Primary Database |
+| **Tiêu đề** | Architecture Decision Record-001: Use PostgreSQL as Primary Database |
 | **Trạng thái** | Accepted |
 | **Ngày** | 2024-01-15 |
 | **Bối cảnh** | Cần database cho e-commerce: ACID cho orders/payments, complex queries, JSON cho product attributes |
 | **Lựa chọn** | PostgreSQL, MySQL, MongoDB, DynamoDB |
-| **Quyết định** | PostgreSQL 15 on AWS RDS |
-| **Lý do** | ACID > MongoDB, JSONB tốt, 4/5 devs quen, RDS managed, ~$200/month |
+| **Quyết định** | PostgreSQL 15 on AWS Relational Database Service |
+| **Lý do** | ACID > MongoDB, JSONB tốt, 4/5 devs quen, Relational Database Service managed, ~$200/month |
 
 **Hậu quả:**
 
@@ -684,30 +684,30 @@ flowchart LR
 | ⚠️ Rủi ro | Write bottleneck → Read replicas + caching |
 | ⚠️ Rủi ro | Migration downtime → Expand/contract pattern |
 
-**ADR Folder Structure:**
+**Architecture Decision Record Folder Structure:**
 
 | File | Mục đích |
 |------|---------|
 | docs/adr/001-use-postgresql.md | Chọn database |
 | docs/adr/002-use-redis-for-caching.md | Chiến lược caching |
 | docs/adr/003-use-rabbitmq-for-async.md | Message queue |
-| docs/adr/004-use-kong-api-gateway.md | API Gateway |
-| docs/adr/template.md | ADR template |
+| docs/adr/004-use-kong-api-gateway.md | Application Programming Interface Gateway |
+| docs/adr/template.md | Architecture Decision Record template |
 
 ---
 
-### Bước 7 — Thiết kế API
+### Bước 7 — Thiết kế Application Programming Interface
 
 **Tại sao quan trọng:** FE và BE code song song mà không conflict.
 
-**API Endpoints:**
+**Application Programming Interface Endpoints:**
 
 | Phương thức | Endpoint | Mô tả | Auth |
 |--------|----------|-------|------|
-| POST | /orders | Tạo đơn hàng mới | Bearer JWT |
-| GET | /orders/{order_id} | Lấy chi tiết đơn hàng | Bearer JWT |
-| PUT | /orders/{order_id}/status | Cập nhật trạng thái | Bearer JWT |
-| DELETE | /orders/{order_id} | Hủy đơn hàng | Bearer JWT |
+| POST | /orders | Tạo đơn hàng mới | Bearer JSON Web Token |
+| GET | /orders/{order_id} | Lấy chi tiết đơn hàng | Bearer JSON Web Token |
+| PUT | /orders/{order_id}/status | Cập nhật trạng thái | Bearer JSON Web Token |
+| DELETE | /orders/{order_id} | Hủy đơn hàng | Bearer JSON Web Token |
 
 **POST /orders - Request:**
 
@@ -759,7 +759,7 @@ flowchart LR
 
 **Tại sao quan trọng:** Schema sai thì migrate đau.
 
-**ERD:**
+**Entity Relationship Diagram (Sơ đồ quan hệ thực thể):**
 
 ```mermaid
 erDiagram
@@ -912,7 +912,7 @@ ALTER TABLE users DROP COLUMN last_name;
 
 ---
 
-### Bước 9 — Design CI/CD Pipeline
+### Bước 9 — Design Continuous Integration/Continuous Deployment Pipeline
 
 **Tại sao quan trọng:** Manual deploy = human error.
 
@@ -921,9 +921,9 @@ ALTER TABLE users DROP COLUMN last_name;
 | Quyết định | Lựa chọn | Đánh đổi |
 |----------|---------|----------|
 | CI Tool | GitHub Actions, GitLab CI, Jenkins | GitHub Actions = đơn giản, Jenkins = linh hoạt |
-| Container Registry | ECR, GCR, Docker Hub | ECR nếu AWS, GCR nếu GCP |
+| Container Registry | Elastic Container Registry, Google Container Registry, Docker Hub | Elastic Container Registry nếu AWS, Google Container Registry nếu GCP |
 | Deploy Strategy | Rolling, Blue-Green, Canary | Canary = an toàn nhưng phức tạp |
-| IaC Tool | Terraform, Pulumi, CloudFormation | Terraform = multi-cloud |
+| Infrastructure as Code Tool | Terraform, Pulumi, CloudFormation | Terraform = multi-cloud |
 
 **Các giai đoạn Pipeline:**
 
@@ -954,7 +954,7 @@ ALTER TABLE users DROP COLUMN last_name;
 
 | Trụ cột | Câu hỏi trả lời | Tools |
 |--------|-----------------|-------|
-| **Logging** | Request này xảy ra chuyện gì? | ELK, Datadog Logs |
+| **Logging** | Request này xảy ra chuyện gì? | Elasticsearch Logstash Kibana, Datadog Logs |
 | **Metrics** | System health như thế nào? | Prometheus + Grafana |
 | **Tracing** | Tại sao chậm? Bottleneck ở đâu? | Jaeger, AWS X-Ray |
 
@@ -1044,9 +1044,9 @@ ALTER TABLE users DROP COLUMN last_name;
 
 | Hạng mục | Kiểm tra |
 |----------|-------|
-| **Auth** | JWT hết hạn nhanh (15 phút access, 7 ngày refresh) |
-| | RBAC implemented |
-| | API rate limiting |
+| **Auth** | JSON Web Token hết hạn nhanh (15 phút access, 7 ngày refresh) |
+| | Role-Based Access Control implemented |
+| | Application Programming Interface rate limiting |
 | | Brute force protection |
 | **Secrets** | No secrets in code/config |
 | | AWS Secrets Manager / Vault |
@@ -1061,7 +1061,7 @@ ALTER TABLE users DROP COLUMN last_name;
 | **Audit** | Audit logging + CloudTrail |
 | | Chính sách lưu trữ log |
 
-**Thiết kế RBAC:**
+**Thiết kế Role-Based Access Control:**
 
 | Role | Quyền | Mô tả |
 |------|-------|-------|
@@ -1077,7 +1077,7 @@ ALTER TABLE users DROP COLUMN last_name;
 | | orders:update:status | Cập nhật trạng thái |
 | | users:read/update:status | Xem user, ban/unban |
 
-**Cấu trúc JWT Token:**
+**Cấu trúc JSON Web Token:**
 
 | Field | Giá trị | Mô tả |
 |-------|---------|-------|
@@ -1177,13 +1177,13 @@ func CreateOrder(ctx context.Context, req CreateOrderRequest) (*Order, error) {
 | 1 | Service boundaries | "Order và Payment là 2 services riêng" |
 | 2 | Architecture style | "Microservices với event-driven cho async" |
 | 3 | Communication | "REST cho sync, RabbitMQ cho async" |
-| 4 | API specs | "OpenAPI 3.0, error format chuẩn" |
+| 4 | Application Programming Interface specs | "OpenAPI 3.0, error format chuẩn" |
 | 5 | Database | "PostgreSQL, eventual consistency giữa services" |
 | 6 | Migration strategy | "Expand/contract, zero-downtime" |
-| 7 | Deployment | "EKS, 3 AZs, Canary deployment" |
-| 8 | CI/CD | "GitHub Actions, Terraform for IaC" |
+| 7 | Deployment | "Elastic Kubernetes Service, 3 Availability Zones, Canary deployment" |
+| 8 | Continuous Integration/Continuous Deployment | "GitHub Actions, Terraform for Infrastructure as Code" |
 | 9 | Observability | "Datadog for all three pillars" |
-| 10 | Security | "JWT + RBAC, Vault for secrets" |
+| 10 | Security | "JSON Web Token + Role-Based Access Control, Vault for secrets" |
 | 11 | Release | "Canary với automated rollback" |
 
 ---
@@ -1194,9 +1194,9 @@ func CreateOrder(ctx context.Context, req CreateOrderRequest) (*Order, error) {
 - [ ] Context Diagram
 - [ ] Component Diagram với ownership
 - [ ] OpenAPI specs cho tất cả services
-- [ ] ERD với migration strategy
-- [ ] ADRs cho mọi quyết định lớn
-- [ ] CI/CD pipeline config
+- [ ] Entity Relationship Diagram với migration strategy
+- [ ] Architecture Decision Records cho mọi quyết định lớn
+- [ ] Continuous Integration/Continuous Deployment pipeline config
 - [ ] Monitoring dashboards
 - [ ] Alert rules + Runbooks
 - [ ] Security checklist
@@ -1226,8 +1226,8 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 | Release | T-0 | Deploy production, monitor 24h |
 
 **SA phải làm trước Code Freeze:**
-- [ ] Tất cả ADRs đã được approve
-- [ ] Tất cả API specs đã finalize
+- [ ] Tất cả Architecture Decision Records đã được approve
+- [ ] Tất cả Application Programming Interface specs đã finalize
 - [ ] Tất cả database migrations đã test trên staging
 - [ ] Performance test đạt target NFRs
 - [ ] Security scan đạt
@@ -1244,7 +1244,7 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 | **Infra** | Changes đã apply staging trước 3 ngày |
 | | Auto-scaling đã cấu hình |
 | | Backup đã xác minh |
-| | DR tested trong 30 ngày |
+| | Disaster Recovery tested trong 30 ngày |
 | **Monitoring** | Alerts đã cấu hình |
 | | Dashboards sẵn sàng |
 | | On-call đã xác nhận |
@@ -1260,8 +1260,8 @@ Thời điểm ngừng merge code mới vào branch release. Chỉ cho phép bug
 
 | Tình huống | Tại sao critical | SA hành động |
 |-----------|------------------|-----------|
-| **Thay đổi Architecture** | Ảnh hưởng toàn hệ thống | Review, ADR, approval |
-| **Integration mới** | Phụ thuộc bên ngoài | Review API, failure modes |
+| **Thay đổi Architecture** | Ảnh hưởng toàn hệ thống | Review, Architecture Decision Record, approval |
+| **Integration mới** | Phụ thuộc bên ngoài | Review Application Programming Interface, failure modes |
 | **Thay đổi Database Schema** | Không rollback được dễ | Migration strategy, backward compatibility |
 | **Security Incident** | Ảnh hưởng business | Điều phối xử lý, post-mortem |
 | **Performance xuống** | Ảnh hưởng user | Tìm nguyên nhân, xử lý ngay |
@@ -1353,7 +1353,7 @@ flowchart TD
 | Khi nào | Cho ai | Nội dung |
 |------|---------|------|
 | Tuần trước sprint | Tech Lead | Architecture decisions cho sprint |
-| Sau major decision | Team | ADR và rationale |
+| Sau major decision | Team | Architecture Decision Record và rationale |
 | Trước release | Stakeholders | Đánh giá rủi ro, go/no-go |
 | Sau incident | Tất cả | Post-mortem findings |
 | Hàng tháng | Management | Technical health report |
@@ -1366,7 +1366,7 @@ flowchart TD
 | Dấu hiệu nguy hiểm | Escalate cho |
 |----------|-------------|
 | Nghi ngờ security breach | Security team + Management |
-| Mất dữ liệu | Management + Legal (nếu PII) |
+| Mất dữ liệu | Management + Legal (nếu Personally Identifiable Information) |
 | Performance < 50% baseline | Tech Lead + Management |
 | External service down > 1 giờ | Vendor + Management |
 | Critical bug không fix được | Tech Lead + Product |
@@ -1399,7 +1399,7 @@ flowchart TD
 | 11:00 | Meeting với Tech Leads - sync technical direction |
 | 14:00 | Viết/update ADRs, specs |
 | 15:00 | 1:1 với DevOps - infra planning |
-| 16:00 | Research new tech, POC nếu cần |
+| 16:00 | Research new tech, Proof of Concept (Bằng chứng khái niệm) nếu cần |
 
 ### SA KHÔNG làm gì
 
@@ -1417,21 +1417,21 @@ flowchart TD
 | "Khi service X chết thì sao?" | Cần design failure modes |
 | "Scale 10x thì tốn bao nhiêu?" | Cần tính cost model |
 | "Rollback như thế nào?" | Cần viết rollback plan |
-| "Tại sao chọn tech này?" | Cần viết ADR |
+| "Tại sao chọn tech này?" | Cần viết Architecture Decision Record |
 
 ### 12 Steps Quick Reference
 
 | Bước | Output | Xong khi |
 |------|--------|----------|
 | 1. Scope | Scope doc | PO sign-off |
-| 2. NFRs | NFR spec có số | Stakeholders đồng ý |
+| 2. Non-Functional Requirements | Non-Functional Requirements spec có số | Stakeholders đồng ý |
 | 3. Context Diagram | System boundary | Tất cả externals đã list |
 | 4. Component Diagram | Services + owners | Mỗi box có owner |
 | 5. Compare Options | Decision matrix | Đã chọn option với rationale |
 | 6. ADRs | Decision docs | Tất cả major decisions đã viết |
-| 7. API Design | Endpoints + schemas | FE/BE đồng bộ |
-| 8. Database | ERD + indexes | Migration plan sẵn sàng |
-| 9. CI/CD | Pipeline config | Auto deploy hoạt động |
+| 7. Application Programming Interface Design | Endpoints + schemas | FE/BE đồng bộ |
+| 8. Database | Entity Relationship Diagram + indexes | Migration plan sẵn sàng |
+| 9. Continuous Integration/Continuous Deployment | Pipeline config | Auto deploy hoạt động |
 | 10. Observability | Dashboards + alerts | On-call có thể debug |
 | 11. Security | Checklist đạt | Không có lỗ hổng critical |
 | 12. Release | Canary + rollback | Quy trình deploy an toàn |
@@ -1491,12 +1491,12 @@ Date: 2024-01-15
 
 KEY DECISIONS:
 - Target: 100k users, 10k orders/ngày
-- Payment: VNPay, Momo, COD (NO credit card)
+- Payment: VNPay, Momo, Cash on Delivery (Không có thẻ tín dụng)
 - Timeline: HARD deadline - investor demo 15/4
 - Budget: $50k infra, $10k tools
 
 RISKS:
-1. 3 tháng tight cho MVP
+1. 3 tháng tight cho Minimum Viable Product
 2. Team chưa làm payment integration
 3. Logistics partner chưa chốt
 
@@ -1512,11 +1512,11 @@ ACTIONS:
 
 | Rủi ro | Xác suất | Ảnh hưởng | Điểm | Giảm thiểu |
 |--------|----------|-----------|------|------------|
-| Payment integration fail | Cao | Critical | 🔴 | POC tuần 1, fallback COD |
+| Payment integration fail | Cao | Critical | 🔴 | Proof of Concept tuần 1, fallback Cash on Delivery |
 | Không kịp deadline | TB | Critical | 🔴 | Cut features, parallel work |
 | Performance không đạt | TB | High | 🟠 | Load test sớm, cache |
 | Security breach | Thấp | Critical | 🟠 | Pentest, security review |
-| Logistics API unstable | Cao | Medium | 🟡 | Circuit breaker, manual fallback |
+| Logistics Application Programming Interface unstable | Cao | Medium | 🟡 | Circuit breaker, manual fallback |
 
 **Risk Response:**
 
@@ -1524,13 +1524,13 @@ ACTIONS:
 CRITICAL RISKS (🔴):
 
 1. Payment Integration Fail
-   - Week 1: POC VNPay sandbox
+   - Week 1: Proof of Concept VNPay sandbox
    - Week 2: Fail → switch Momo
-   - Fallback: Launch COD only
+   - Fallback: Launch Cash on Delivery only
    - Owner: Team B + SA review
 
 2. Không kịp deadline
-   - MVP: Browse, Cart, Checkout, Order tracking
+   - Minimum Viable Product: Browse, Cart, Checkout, Order tracking
    - CUT: Advanced search, Wishlist, Reviews
    - Weekly checkpoint với CEO
 ```
@@ -1552,7 +1552,7 @@ CALCULATIONS:
    - 10,000 orders/ngày ÷ 86,400 = 0.12 orders/sec
    - 80% orders trong 8h (10AM-6PM)
    - → 8,000 ÷ 28,800 = 0.28 orders/sec peak
-   - Mỗi order = ~20 API calls
+   - Mỗi order = ~20 Application Programming Interface calls
    - → 0.28 × 20 = 5.6 req/sec orders
    - Browse traffic = 10x orders
    - → ~60 req/sec normal, 600 req/sec flash sale
@@ -1561,7 +1561,7 @@ CALCULATIONS:
    - Orders: 10k/ngày × 365 = 3.65M rows/năm
    - Order items: 3 items/order = 11M rows/năm
    - Total: ~15M rows/năm = ~5GB/năm
-   - → RDS db.t3.medium đủ năm đầu
+   - → Relational Database Service db.t3.medium đủ năm đầu
 
 3. INSTANCE SIZING
    - 600 req/sec peak
@@ -1578,12 +1578,12 @@ CALCULATIONS:
 
 | Component | Size | Cost/month | Scale Trigger |
 |-----------|------|------------|---------------|
-| EKS Cluster | 2 nodes t3.medium | $140 | CPU > 70% |
-| RDS PostgreSQL | db.t3.medium Multi-AZ | $130 | Connections > 80% |
+| Elastic Kubernetes Service Cluster | 2 nodes t3.medium | $140 | CPU > 70% |
+| Relational Database Service PostgreSQL | db.t3.medium Multi-Availability Zone | $130 | Connections > 80% |
 | ElastiCache Redis | cache.t3.small | $25 | Memory > 70% |
-| ALB | 1 | $20 | - |
-| S3 + CloudFront | 100GB | $30 | - |
-| NAT Gateway | 1 | $45 | - |
+| Application Load Balancer | 1 | $20 | - |
+| Simple Storage Service + CloudFront | 100GB | $30 | - |
+| Network Address Translation Gateway | 1 | $45 | - |
 | **Total** | | **~$390** | |
 
 ### 10.4 Failure Mode Analysis
@@ -1617,7 +1617,7 @@ flowchart TD
 
 **Failure Mode Table:**
 
-| Component | Failure | User thấy | Mitigation | RTO |
+| Component | Failure | User thấy | Mitigation | Recovery Time Objective |
 |-----------|---------|-----------|------------|-----|
 | Product Service | Crash | Trang trắng | Cache, restart | 30s |
 | | Slow >2s | Loading lâu | Timeout, cached | 2s |
@@ -1634,7 +1634,7 @@ flowchart TD
 CRITICAL (không fallback, phải hoạt động):
 Order Service → Payment → Database write
 - Fail = User không mua được = mất tiền
-- SLA: 99.9% = 8.7h downtime/năm max
+- Service Level Agreement (Thỏa thuận mức độ dịch vụ): 99.9% = 8.7h downtime/năm max
 
 NON-CRITICAL (có fallback):
 - Notification → Order vẫn OK
@@ -1654,7 +1654,7 @@ sequenceDiagram
     participant PAY as VNPay
 
     U->>FE: Click "Thanh toán"
-    FE->>OS: POST /orders (JWT)
+    FE->>OS: POST /orders (JSON Web Token)
     OS->>PS: Check inventory
     PS->>DB: SELECT stock
     DB-->>PS: stock = 5
@@ -1699,8 +1699,8 @@ COMMIT;
 
 | Integration | Type | Timeout | Retry | Circuit Breaker | Fallback |
 |-------------|------|---------|-------|-----------------|----------|
-| VNPay | External | 30s | 3x exp | Yes, 5 fails | COD option |
-| Momo | External | 30s | 3x exp | Yes, 5 fails | VNPay/COD |
+| VNPay | External | 30s | 3x exp | Yes, 5 fails | Cash on Delivery option |
+| Momo | External | 30s | 3x exp | Yes, 5 fails | VNPay/Cash on Delivery |
 | GHN Shipping | External | 10s | 2x | Yes, 3 fails | Manual |
 | SendGrid | External | 5s | 5x async | Yes, 10 fails | Queue later |
 | Internal | Internal | 2s | 2x | Yes, 5 fails | Error |
@@ -1711,12 +1711,12 @@ COMMIT;
 
 ```mermaid
 gantt
-    title E-Commerce MVP Roadmap
+    title E-Commerce Minimum Viable Product Roadmap
     dateFormat  YYYY-MM-DD
     section Foundation
     NFRs & Architecture     :f1, 2024-01-15, 7d
-    AWS/VPC Setup          :f2, 2024-01-15, 5d
-    VNPay POC              :f3, 2024-01-17, 7d
+    AWS/Virtual Private Cloud Setup          :f2, 2024-01-15, 5d
+    VNPay Proof of Concept              :f3, 2024-01-17, 7d
     DB Schema v1           :f4, 2024-01-22, 5d
     section Core Services
     User Service           :c1, 2024-01-29, 10d
@@ -1748,7 +1748,7 @@ gantt
     dateFormat  YYYY-MM-DD
     section DevOps
     AWS Setup              :2024-01-15, 5d
-    CI/CD Pipeline         :2024-01-20, 7d
+    Continuous Integration/Continuous Deployment Pipeline         :2024-01-20, 7d
     Monitoring             :2024-02-26, 10d
     Production Deploy      :2024-03-25, 5d
     section Team A (3 BE)
@@ -1756,12 +1756,12 @@ gantt
     Product Service        :2024-01-29, 14d
     Notification Svc       :2024-02-19, 10d
     section Team B (2 BE)
-    VNPay POC              :2024-01-17, 7d
+    VNPay Proof of Concept              :2024-01-17, 7d
     Order Service          :2024-02-01, 14d
     Payment Integration    :2024-02-12, 14d
     section FE Team (3)
     UI Components          :2024-01-22, 14d
-    API Integration        :2024-02-05, 21d
+    Application Programming Interface Integration        :2024-02-05, 21d
     UAT Support            :2024-03-14, 10d
 ```
 
@@ -1802,7 +1802,7 @@ flowchart LR
 
 | Gate | Criteria | Blocker nếu fail |
 |------|----------|------------------|
-| Gate 1 | NFRs signed, diagrams reviewed, VNPay POC works | Không có architecture → team code lung tung |
+| Gate 1 | Non-Functional Requirements signed, diagrams reviewed, VNPay Proof of Concept works | Không có architecture → team code lung tung |
 | Gate 2 | OpenAPI specs done, DB schema approved | FE/BE không sync → integration hell |
 | Gate 3 | Payment + Shipping APIs work end-to-end | Core flow broken → không có product |
 | Gate 4 | 600 req/s, P99 < 500ms, no critical bugs | Performance issues in prod |
@@ -1821,12 +1821,12 @@ flowchart TB
     subgraph AWS["AWS ap-southeast-1"]
         subgraph Public["Public Subnet"]
             ALB[Application Load Balancer]
-            NAT[NAT Gateway]
+            NAT[Network Address Translation Gateway]
         end
 
-        subgraph Private["Private Subnet - AZ1"]
-            subgraph EKS["EKS Cluster"]
-                Kong[Kong API Gateway]
+        subgraph Private["Private Subnet - Availability Zone 1"]
+            subgraph EKS["Elastic Kubernetes Service Cluster"]
+                Kong[Kong Application Programming Interface Gateway]
                 UserSvc[User Service]
                 ProductSvc[Product Service]
                 OrderSvc[Order Service]
@@ -1835,15 +1835,15 @@ flowchart TB
             end
         end
 
-        subgraph Data["Data Layer - Multi-AZ"]
+        subgraph Data["Data Layer - Multi-Availability Zone"]
             RDS[(PostgreSQL<br/>Primary)]
             RDS2[(PostgreSQL<br/>Standby)]
             Redis[(ElastiCache<br/>Redis)]
         end
 
         subgraph Storage["Storage"]
-            S3[(S3 Bucket<br/>Images)]
-            CF[CloudFront CDN]
+            S3[(Simple Storage Service Bucket<br/>Images)]
+            CF[CloudFront Content Delivery Network]
         end
 
         subgraph Monitor["Monitoring"]
@@ -1926,8 +1926,8 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    subgraph MVP["MVP Architecture"]
-        FE[React SPA] --> API[Monolithic API<br/>Go]
+    subgraph MVP["Minimum Viable Product Architecture"]
+        FE[React Single Page Application] --> API[Monolithic Application Programming Interface<br/>Go]
         API --> DB[(PostgreSQL)]
         API --> Cache[(Redis)]
         API --> Pay[Payment<br/>VNPay/Momo]
@@ -1940,7 +1940,7 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph Scale["Scaled Architecture"]
-        FE[React SPA] --> GW[API Gateway]
+        FE[React Single Page Application] --> GW[Application Programming Interface Gateway]
         GW --> User[User Svc]
         GW --> Product[Product Svc]
         GW --> Order[Order Svc]
@@ -1968,7 +1968,7 @@ flowchart TB
         end
 
         subgraph Gateway
-            Kong[Kong Gateway<br/>Rate Limit, Auth]
+            Kong[Kong Application Programming Interface Gateway<br/>Rate Limit, Auth]
         end
 
         subgraph Services
@@ -2095,8 +2095,8 @@ flowchart LR
 | Task | SA | Tech Lead | Dev | DevOps | PO |
 |------|:--:|:---------:|:---:|:------:|:--:|
 | Architecture Design | **R** | C | I | C | A |
-| NFR Definition | **R** | C | I | C | A |
-| API Specs | A | **R** | C | I | I |
+| Non-Functional Requirements Definition | **R** | C | I | C | A |
+| Application Programming Interface Specs | A | **R** | C | I | I |
 | Code Implementation | I | A | **R** | I | I |
 | Code Review | I | **R** | C | I | I |
 | Deployment | C | C | I | **R** | I |
@@ -2119,7 +2119,7 @@ flowchart LR
         Review --> Test[Unit Tests]
         Test --> Lint[Lint + Security]
         Lint --> Build[Build Image]
-        Build --> Push[Push to ECR]
+        Build --> Push[Push to Elastic Container Registry]
     end
 
     subgraph CD["CD Pipeline"]
@@ -2157,7 +2157,7 @@ flowchart TB
     end
 
     subgraph Stage2["Stage 2: Security"]
-        S2A[SAST Scan]
+        S2A[Static Application Security Testing Scan]
         S2B[Dependency Check]
         S2C[Container Scan]
         S2A --> S2B --> S2C
@@ -2185,9 +2185,9 @@ AWS (ap-southeast-1):
 ├── Compute
 │   ├── EKS: $73/month
 │   ├── EC2 t3.medium ×2: $67/month
-│   └── NAT Gateway: $45/month
+│   └── Network Address Translation Gateway: $45/month
 ├── Database
-│   ├── RDS Multi-AZ: $130/month
+│   ├── Relational Database Service Multi-Availability Zone: $130/month
 │   └── Redis: $25/month
 ├── Storage
 │   ├── S3 100GB: $2/month
@@ -2225,7 +2225,7 @@ COST PER ORDER (10k/ngày):
 ### 10.9 Production Readiness Checklist
 
 **Infrastructure:**
-- [ ] Multi-AZ configured
+- [ ] Multi-Availability Zone configured
 - [ ] Auto-scaling (CPU > 70%)
 - [ ] Backups verified
 - [ ] SSL certificates
@@ -2258,7 +2258,7 @@ COST PER ORDER (10k/ngày):
 - [ ] Load test passed (600 req/s)
 - [ ] No N+1 queries
 - [ ] Caching works
-- [ ] CDN for assets
+- [ ] Content Delivery Network for assets
 - [ ] Gzip enabled
 
 ### 10.10 Post-Launch
@@ -2281,7 +2281,7 @@ COST PER ORDER (10k/ngày):
 | Security scan | Weekly |
 | Architecture review | Bi-weekly |
 | Capacity planning | Monthly |
-| DR drill | Quarterly |
+| Disaster Recovery drill | Quarterly |
 
 ---
 
@@ -2350,7 +2350,7 @@ COST PER ORDER (10k/ngày):
 ---
 
 **Tài liệu tham khảo:**
-- [AWS ADR Best Practices](https://aws.amazon.com/blogs/architecture/master-architecture-decision-records-adrs-best-practices-for-effective-decision-making/)
-- [Google Cloud ADR Guide](https://cloud.google.com/architecture/architecture-decision-records)
+- [AWS Architecture Decision Record Best Practices](https://aws.amazon.com/blogs/architecture/master-architecture-decision-records-adrs-best-practices-for-effective-decision-making/)
+- [Google Cloud Architecture Decision Record Guide](https://cloud.google.com/architecture/architecture-decision-records)
 - [Microsoft Azure Well-Architected Framework](https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record)
-- [ADR Templates](https://adr.github.io/)
+- [Architecture Decision Record Templates](https://adr.github.io/)
