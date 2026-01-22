@@ -20,18 +20,53 @@
     font-family: var(--mono-font) !important;
   }
   
-  /* Hide navigation tabs and menu items */
+  /* Hide ALL navigation tabs and menu items */
   nav.tabs,
   .nav-tabs,
   .tabs-wrapper,
   .site-nav,
   header nav,
   #sidebar nav,
-  .sidebar nav {
+  .sidebar nav,
+  .sidebar,
+  #sidebar,
+  aside.sidebar,
+  .site-sidebar,
+  nav[aria-label],
+  .tabs,
+  ul.nav-tabs,
+  .nav-list,
+  .menu,
+  .navigation {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
   
-  /* Hide specific menu items */
+  /* Hide sidebar completely */
+  #sidebar,
+  aside#sidebar,
+  .sidebar,
+  aside.sidebar {
+    display: none !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Adjust main content when sidebar is hidden */
+  main,
+  .main-content,
+  #main-wrapper,
+  .content-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Hide specific menu items and links */
   a[href="/"],
   a[href="/home/"],
   a[href="/about/"],
@@ -39,7 +74,19 @@
   a[href*="trang-chu"],
   a[href*="gioi-thieu"],
   a[href*="home"],
-  a[href*="about"] {
+  a[href*="about"],
+  a:contains("TRANG CHỦ"),
+  a:contains("GIỚI THIỆU"),
+  a:contains("SỐ TAY") {
+    display: none !important;
+  }
+  
+  /* Hide any list items containing these texts */
+  li:has(a[href="/"]),
+  li:has(a[href="/home/"]),
+  li:has(a[href="/about/"]),
+  li:has(a[href*="trang-chu"]),
+  li:has(a[href*="gioi-thieu"]) {
     display: none !important;
   }
 </style>
