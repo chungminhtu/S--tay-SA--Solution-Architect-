@@ -200,7 +200,7 @@ function generateStaticHTML(files, searchIndex) {
     }
 
     .sidebar-nav a {
-      color: #333 !important;
+      color: #000 !important;
       font-size: 0.9em;
       padding: 4px 8px;
       display: block;
@@ -242,7 +242,7 @@ function generateStaticHTML(files, searchIndex) {
     .markdown-section h1 {
       font-family: 'Lexend Deca', sans-serif !important;
       font-weight: 600;
-      color: #1a1a1a;
+      color: #000000;
       border-bottom: 2px solid var(--theme-color);
       padding-bottom: 0.3em;
       font-size: 2em;
@@ -251,7 +251,7 @@ function generateStaticHTML(files, searchIndex) {
     .markdown-section h2 {
       font-family: 'Lexend Deca', sans-serif !important;
       font-weight: 600;
-      color: #333;
+      color: #000;
       border-bottom: 1px solid #eee;
       padding-bottom: 0.2em;
       margin-top: 2em;
@@ -261,7 +261,7 @@ function generateStaticHTML(files, searchIndex) {
     .markdown-section h3 {
       font-family: 'Lexend Deca', sans-serif !important;
       font-weight: 500;
-      color: #444;
+      color: #000;
       margin-top: 1.5em;
       font-size: 1.3em;
     }
@@ -281,7 +281,7 @@ function generateStaticHTML(files, searchIndex) {
       font-family: 'Lexend Deca', sans-serif !important;
       font-weight: 400;
       line-height: 1.7;
-      color: #1a1a1a;
+      color: #000000;
     }
 
     /* Code - JetBrains Mono */
@@ -296,7 +296,7 @@ function generateStaticHTML(files, searchIndex) {
 
     .markdown-section code {
       background: #f3f4f6;
-      color: #dc2626;
+      color: #000;
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.9em;
@@ -313,7 +313,7 @@ function generateStaticHTML(files, searchIndex) {
 
     .markdown-section pre code {
       background: transparent;
-      color: #333;
+      color: #000;
       padding: 0;
       font-size: 0.9em;
       line-height: 1.6;
@@ -337,7 +337,7 @@ function generateStaticHTML(files, searchIndex) {
     .markdown-section th {
       background: #f5f5f5;
       font-weight: 600;
-      color: #333;
+      color: #000;
     }
 
     .markdown-section tr:nth-child(even) {
@@ -469,19 +469,40 @@ function generateStaticHTML(files, searchIndex) {
   <!-- Mermaid diagrams -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>
-    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose'
+    });
 
     // Render mermaid after docsify loads content
     function renderMermaid() {
-      document.querySelectorAll('pre[data-lang="mermaid"], code.language-mermaid').forEach(function(el) {
+      var selectors = [
+        'pre[data-lang="mermaid"]',
+        'code.language-mermaid',
+        'code.lang-mermaid',
+        '.language-mermaid'
+      ];
+
+      document.querySelectorAll(selectors.join(', ')).forEach(function(el) {
+        if (el.closest('.mermaid')) return; // Already processed
+
         var code = el.textContent || el.innerText;
         var pre = el.tagName === 'CODE' ? el.parentElement : el;
-        var div = document.createElement('div');
-        div.className = 'mermaid';
-        div.textContent = code;
-        pre.parentNode.replaceChild(div, pre);
+
+        if (pre && pre.parentNode) {
+          var div = document.createElement('div');
+          div.className = 'mermaid';
+          div.textContent = code;
+          pre.parentNode.replaceChild(div, pre);
+        }
       });
-      mermaid.run();
+
+      try {
+        mermaid.run();
+      } catch(e) {
+        console.error('Mermaid error:', e);
+      }
     }
 
     // Hook into docsify
@@ -489,7 +510,7 @@ function generateStaticHTML(files, searchIndex) {
       window.$docsify.plugins = window.$docsify.plugins || [];
       window.$docsify.plugins.push(function(hook) {
         hook.doneEach(function() {
-          renderMermaid();
+          setTimeout(renderMermaid, 100);
         });
       });
     }
