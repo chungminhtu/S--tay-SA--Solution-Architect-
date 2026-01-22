@@ -1,10 +1,15 @@
 title: Sổ tay Solution Architect
+tagline: Tài liệu này viết cho dev muốn hiểu SA làm gì, hoặc dev đang chuyển sang làm SA.
 description: Tài liệu này viết cho dev muốn hiểu SA làm gì, hoặc dev đang chuyển sang làm SA.
-theme: jekyll-theme-cayman
-remote_theme: pages-themes/cayman@v0.2.0
+remote_theme: cotes2020/jekyll-theme-chirpy@latest
+
+lang: vi
+timezone: Asia/Ho_Chi_Minh
 
 plugins:
   - jekyll-remote-theme
+  - jekyll-feed
+  - jekyll-sitemap
 
 markdown: kramdown
 highlighter: rouge
@@ -12,3 +17,8 @@ highlighter: rouge
 kramdown:
   input: GFM
   syntax_highlighter: rouge
+
+# Chirp theme minimal config
+theme_mode: light
+sidebar:
+  nav: []
