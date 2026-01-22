@@ -20,5 +20,10 @@ kramdown:
 
 # Chirp theme minimal config
 theme_mode: light
+tabs:
+  home: false
+  archives: false
+  categories: false
+  tags: false
 sidebar:
   nav: []
