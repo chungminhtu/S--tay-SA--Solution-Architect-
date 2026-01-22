@@ -9,14 +9,37 @@
   }
   
   body {
-    font-family: var(--main-font);
+    font-family: var(--main-font) !important;
   }
   
   code, pre, kbd, samp {
-    font-family: var(--mono-font);
+    font-family: var(--mono-font) !important;
   }
   
   .highlight pre {
-    font-family: var(--mono-font);
+    font-family: var(--mono-font) !important;
+  }
+  
+  /* Hide navigation tabs and menu items */
+  nav.tabs,
+  .nav-tabs,
+  .tabs-wrapper,
+  .site-nav,
+  header nav,
+  #sidebar nav,
+  .sidebar nav {
+    display: none !important;
+  }
+  
+  /* Hide specific menu items */
+  a[href="/"],
+  a[href="/home/"],
+  a[href="/about/"],
+  a[href="/giới-thiệu/"],
+  a[href*="trang-chu"],
+  a[href*="gioi-thieu"],
+  a[href*="home"],
+  a[href*="about"] {
+    display: none !important;
   }
 </style>

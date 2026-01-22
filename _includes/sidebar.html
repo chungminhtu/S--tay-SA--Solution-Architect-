@@ -1,0 +1,25 @@
+{% comment %}
+  Override Chirp theme sidebar to hide navigation tabs
+{% endcomment %}
+
+<style>
+  /* Hide navigation tabs */
+  #sidebar .nav-tabs,
+  #sidebar .sidebar-bottom,
+  nav.tabs,
+  .tabs-wrapper,
+  .site-nav,
+  header .nav-tabs {
+    display: none !important;
+  }
+  
+  /* Hide empty home/about links if they exist */
+  a[href="/"],
+  a[href="/home/"],
+  a[href="/about/"],
+  a[href="/giới-thiệu/"],
+  a[href*="trang-chu"],
+  a[href*="gioi-thieu"] {
+    display: none !important;
+  }
+</style>
